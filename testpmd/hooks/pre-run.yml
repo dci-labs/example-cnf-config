@@ -1,1 +1,6 @@
 ---
+- name: Checkout example CNF deploy
+  git:
+    repo: 'https://github.com/krsacme/nfv-example-cnf-deploy.git'
+    dest: "{{ dci_config_dir }}/hooks/nfv-example-cnf-deploy"
+    update: yes
