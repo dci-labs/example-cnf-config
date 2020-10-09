@@ -1,4 +1,4 @@
-# cnf-example-config
+# example-cnf-config
 
 Samples files to deploy and enable `TestPMD` application with the `dci-openshift-app-agent` .
 Work In Progress.
@@ -27,7 +27,7 @@ Create a pipeline file. For example:
     dci_credentials: /etc/dci-openshift-app-agent/dci_credentials.yml
     ansible_extravars:
       dci_cache_dir: /var/lib/dci-pipeline
-      dci_config_dir: /path/to/git/clone/cnf-example-config/testpmd
+      dci_config_dir: /path/to/git/clone/example-cnf-config/testpmd
       operator_version: v0.0.1
       app_version: v0.1.2
       registry_url: "jumphost.{{ cluster_name }}.dfwt5g.lab:5000"
