@@ -10,6 +10,18 @@
     - python3-pyyaml
   become: true
 
-- name: Run example CNF role
+- name: Deploy NFV Example CNF catalog
   include_role:
-    name: "{{ dci_config_dir }}/hooks/nfv-example-cnf-deploy/roles/nfv-example-cnf"
+    name: "{{ dci_config_dir }}/hooks/nfv-example-cnf-deploy/roles/example-cnf-catalog"
+
+- name: Label the nodes for running testpmd and trex
+  include_role:
+    name: "{{ dci_config_dir }}/hooks/nfv-example-cnf-deploy/roles/example-cnf-labels"
+
+- name: Deploy the Example CNF applications
+  include_role:
+    name: "{{ dci_config_dir }}/hooks/nfv-example-cnf-deploy/roles/example-cnf-app"
+
+- name: Run migration test
+  include_role:
+    name: "{{ dci_config_dir }}/hooks/nfv-example-cnf-deploy/roles/example-cnf-validate"
