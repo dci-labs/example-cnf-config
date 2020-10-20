@@ -1,1 +1,8 @@
 ---
+- name: Deploy the Example CNF applications
+  include_role:
+    name: "{{ dci_config_dir }}/hooks/nfv-example-cnf-deploy/roles/example-cnf-app"
+
+- name: Run migration test
+  include_role:
+    name: "{{ dci_config_dir }}/hooks/nfv-example-cnf-deploy/roles/example-cnf-validate"
