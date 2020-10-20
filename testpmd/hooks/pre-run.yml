@@ -1,4 +1,18 @@
 ---
+- name: Check if namespace exists
+  k8s_info:
+    api_version: v1
+    kind: namespace
+    name: "{{ dci_openshift_app_ns | default('example-cnf') }}"
+  register: example_cnf_namespace
+
+- name: Delete namespace if exists
+  k8s:
+    api_version: v1
+    kind: namespace
+    name: "{{ dci_openshift_app_ns | default('example-cnf') }}"
+    state: absent
+
 - name: Checkout Example CNF deployment role
   git:
     repo: 'https://github.com/rh-nfv-int/nfv-example-cnf-deploy.git'
