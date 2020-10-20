@@ -12,6 +12,7 @@
     kind: namespace
     name: "{{ dci_openshift_app_ns | default('example-cnf') }}"
     state: absent
+  when: example_cnf_namespace.resources|length > 0
 
 - name: Checkout Example CNF deployment role
   git:
