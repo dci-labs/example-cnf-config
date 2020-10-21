@@ -22,8 +22,6 @@ spec:
       - size: "1G"
         count: 32
         node: 1
-  realTimeKernel:
-    enabled: true
   numa:
     topologyPolicy: "best-effort"
   nodeSelector:

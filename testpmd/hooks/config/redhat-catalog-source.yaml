@@ -47,3 +47,26 @@
     delay: 5
     until: pkg_manifest_sriov.resources|length != 0
     failed_when: pkg_manifest_sriov.resources|length == 0
+
+# TODO: This works for OCP 4.5 (and catalog v1), check if each version requires different file
+- name: Create Image mirrors for local registry
+  k8s:
+    definition: "{{ lookup('template', 'image-content-source-policy.yaml.j2') }}"
+  register: image_policy
+
+- name: Check for image policy apply on all nodes
+  when: image_policy is changed
+  block:
+    - name: Wait for content policy to start applying on nodes
+      pause:
+        seconds: 30
+    - name: Check all nodes are in schedulable state
+      k8s_info:
+        kind: Node
+        field_selectors:
+          - spec.unschedulable=true
+      register: nodes
+      retries: 300
+      delay: 10
+      until: nodes.resources|length == 0
+      failed_when: nodes.resources|length != 0

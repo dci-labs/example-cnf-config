@@ -36,13 +36,115 @@
         source: "{{ redhat_catalog_source }}"
         sourceNamespace: openshift-marketplace
 
-- name: Basic Performance profile block
-  when: performance_profile_basic|default(true)
+- name: Check if performance-addon-operator csv is installed
+  k8s_info:
+    api: operators.coreos.com/v1alpha1
+    namespace: openshift-performance-addon
+    kind: ClusterServiceVersion
+  register: csv
+  retries: 30
+  delay: 5
+  until: "csv.resources|length == 1 and csv.resources[0].status.phase == 'Succeeded'"
+  failed_when: "csv.resources|length != 1 or csv.resources[0].status.phase != 'Succeeded'"
+
+- name: Apply label to worker mcp
+  shell: |
+    export KUBECONFIG={{ kubeconfig_path }}
+    oc label mcp worker machineconfiguration.openshift.io/role=worker --overwrite
+
+########## Add all the PerformanceProfile creations in this block #############
+
+- name: Create basic PerformanceProfile
+  k8s:
+    api: "performance.openshift.io/v1alpha1"
+    definition: "{{ lookup('file', 'performance-profile-basic.yaml') }}"
+  when: performance_profile_basic|default(true)|bool
+  register: profile_state
+
+###############################################################################
+
+- name: Get PerformanceProfile
+  k8s_info:
+    api: "performance.openshift.io/v1alpha1"
+    kind: PerformanceProfile
+    namespace: default
+  register: profiles
+
+- name: Set the PerformanceProfile name
+  set_fact:
+    profile_name: "{{ profiles.resources[0].metadata.name }}"
+  when: profiles.resources|length == 1
+- name: Check if one (only one) PerformanceProfile is present
+  fail:
+    msg: "One PerformanceProfile (profiles.resources|length) is required"
+  when: profiles.resources|length != 1
+
+- name: PerformanceProfile validation block
+  when: profile_name is defined and profile_state is changed
   block:
-  - name: Create Performance profile
-    k8s:
-      api: "performance.openshift.io/v1alpha1"
-      definition: "{{ lookup('file', 'performance-profile-basic.yaml') }}"
-  # TODO: Check for worker node restarted succesfully with profile applied and remove pause
-  - pause:
-      seconds: 300
+    # TODO: Remove this delay once valid events are catpured
+    - pause:
+        seconds: 10
+    - name: Check for KubeletConfig creation
+      k8s_info:
+        api: machineconfiguration.openshift.io/v1
+        kind: KubeletConfig
+        name: "performance-{{ profile_name }}"
+        namespace: default
+      register: kubelet
+      retries: 30
+      delay: 5
+      until: "kubelet.resources|length == 1"
+      failed_when: "kubelet.resources|length != 1"
+    - name: Check for MachineConfig creation
+      k8s_info:
+        api: machineconfiguration.openshift.io/v1
+        kind: MachineConfig
+        name: "performance-{{ profile_name }}"
+        namespace: default
+      register: machine
+      retries: 30
+      delay: 5
+      until: "machine.resources|length == 1"
+      failed_when: "machine.resources|length != 1"
+    - name: Set performance profile MachineConfig time
+      set_fact:
+        perf_machine_created: "{{ machine.resources[0].metadata.creationTimestamp }}"
+    - name: Give a delay for the worker config to be rendered after performance MachineConfig is created
+      pause:
+        seconds: 10
+    - name: Get all MachineConfigs
+      k8s_info:
+        api: machineconfiguration.openshift.io/v1
+        kind: MachineConfig
+        namespace: default
+      register: mc_list
+      no_log: true
+    - name: Get rendered-worker name
+      set_fact:
+        worker_machine_id: "{{ item.metadata.name }}"
+        worker_machine_created: "{{ item.metadata.creationTimestamp }}"
+      when:
+        - "'rendered-worker' in item.metadata.name"
+        - "item.metadata.creationTimestamp > perf_machine_created"
+      loop: "{{ mc_list.resources }}"
+      no_log: true
+    - name: Check if rendered-worker is created with performance profile configuration
+      fail:
+        msg: "rendered-worker is not updated with performance profile"
+      when: worker_machine_id is undefined
+
+    # TODO: Test if this nodes will go to unschedulable state immediately or
+    # a wait is required for first node to be in that state
+    - pause:
+        seconds: 15
+    - name: Check all nodes are in schedulable state
+      k8s_info:
+        kind: Node
+        field_selectors:
+          - spec.unschedulable=true
+      register: nodes
+      retries: 300
+      delay: 10
+      until: nodes.resources|length == 0
+      failed_when: nodes.resources|length != 0
