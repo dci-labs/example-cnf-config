@@ -14,6 +14,17 @@
     state: absent
   when: example_cnf_namespace.resources|length > 0
 
+- name: Deploy Red Hat Catalog Source
+  include_tasks: config/redhat-catalog-source.yaml
+
+- name: Enable Peformance Addon Operator and Profile
+  include_tasks: config/performance.yaml
+  when: enable_perf_addon|default(true)
+
+- name: Enable SR-IOV operator and Networks
+  include_tasks: config/sriov.yaml
+  when: enable_sriov|default(true)
+
 - name: Checkout Example CNF deployment role
   git:
     repo: 'https://github.com/rh-nfv-int/nfv-example-cnf-deploy.git'

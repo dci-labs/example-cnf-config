@@ -1,0 +1,48 @@
+---
+- name: Create namespace for Performance Addon operator
+  k8s:
+    definition:
+      apiVersion: v1
+      kind: Namespace
+      metadata:
+        labels:
+          openshift.io/cluster-monitoring: "true"
+        name: openshift-performance-addon
+      spec: {}
+
+- name: Create operatorgroup for Performance Addon operator
+  k8s:
+    definition:
+      apiVersion: operators.coreos.com/v1
+      kind: OperatorGroup
+      metadata:
+        name: openshift-performance-addon-operatorgroup
+        namespace: openshift-performance-addon
+      spec:
+        targetNamespaces:
+          - openshift-performance-addon
+
+- name: Create subscription for Performance Addon operator
+  k8s:
+    definition:
+      apiVersion: operators.coreos.com/v1alpha1
+      kind: Subscription
+      metadata:
+        name: performance-addon-operator-subscription
+        namespace: openshift-performance-addon
+      spec:
+        channel: "{{ ocp_version }}"
+        name: performance-addon-operator
+        source: "{{ redhat_catalog_source }}"
+        sourceNamespace: openshift-marketplace
+
+- name: Basic Performance profile block
+  when: performance_profile_basic|default(true)
+  block:
+  - name: Create Performance profile
+    k8s:
+      api: "performance.openshift.io/v1alpha1"
+      definition: "{{ lookup('file', 'performance-profile-basic.yaml') }}"
+  # TODO: Check for worker node restarted succesfully with profile applied and remove pause
+  - pause:
+      seconds: 300

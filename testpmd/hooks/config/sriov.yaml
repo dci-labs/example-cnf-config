@@ -1,0 +1,37 @@
+---
+- name: Create namespace for SR-IOV operator
+  k8s:
+    definition:
+      apiVersion: v1
+      kind: Namespace
+      metadata:
+        name: openshift-sriov-network-operator
+        labels:
+          openshift.io/run-level: "1"
+
+- name: Create operatorgroup for SR-IOV operator
+  k8s:
+    definition:
+      apiVersion: operators.coreos.com/v1
+      kind: OperatorGroup
+      metadata:
+        name: sriov-network-operators
+        namespace: openshift-sriov-network-operator
+      spec:
+        targetNamespaces:
+        - openshift-sriov-network-operator
+
+- name: Create subscription for SR-IOV operator
+  k8s:
+    definition:
+      apiVersion: operators.coreos.com/v1alpha1
+      kind: Subscription
+      metadata:
+        name: sriov-network-operator-subsription
+        namespace: openshift-sriov-network-operator
+      spec:
+        channel: "{{ ocp_version }}"
+        name: sriov-network-operator
+        source: "{{ redhat_catalog_source }}"
+        sourceNamespace: openshift-marketplace
+- name:
