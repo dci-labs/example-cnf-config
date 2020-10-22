@@ -47,10 +47,11 @@
   until: "csv.resources|length == 1 and csv.resources[0].status.phase == 'Succeeded'"
   failed_when: "csv.resources|length != 1 or csv.resources[0].status.phase != 'Succeeded'"
 
+# TODO(skramaja): This workaround is required only for ocp versions <= 4.5
 - name: Apply label to worker mcp
   shell: |
     export KUBECONFIG={{ kubeconfig_path }}
-    oc label mcp worker machineconfiguration.openshift.io/role=worker --overwrite
+    {{ oc_tool_path }}/oc label mcp worker machineconfiguration.openshift.io/role=worker --overwrite
 
 ########## Add all the PerformanceProfile creations in this block #############
 

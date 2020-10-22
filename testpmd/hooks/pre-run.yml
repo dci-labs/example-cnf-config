@@ -32,6 +32,21 @@
     msg: "Not enough worker nodes ({{ worker_node_count }}) to perform required tasks"
   when: worker_node_count|int <= 1
 
+- name: Set the cache location
+  set_fact:
+    provision_cache_store: "{{ hostvars[groups['registry_host'][0]].provision_cache_store }}"
+
+- name: Get openshift_version from job.components
+  set_fact:
+    version: "{{ item['name'] }}"
+    tags: "{{ item['tags'] }}"
+  with_items: "{{ job_info.job.components }}"
+  when: item["type"] == "ocp"
+
+- name: Set oc tool location
+  set_fact:
+    oc_tool_path: "{{ provision_cache_store }}/{{ version }}"
+
 - name: Deploy Red Hat Catalog Source
   include_tasks: config/redhat-catalog-source.yaml
 
