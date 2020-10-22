@@ -33,12 +33,8 @@
   when: worker_node_count|int <= 1
 
 - name: Set the cache location
-  block:
-    - set_fact:
-        provision_cache_store: "{{ hostvars[groups['registry_host'][0]].provision_cache_store }}"
-  rescue:
-    - set_fact:
-        provision_cache_store: '/opt/cache'
+  set_fact:
+    provision_cache_store: "{{ hostvars[groups['registry_host'][0]].provision_cache_store | default('/opt/cache')}}"
 
 - name: Get openshift_version from job.components
   set_fact:
