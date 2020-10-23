@@ -5,3 +5,11 @@
     name: "{{ dci_openshift_app_ns | default('example-cnf') }}"
     state: absent
   ignore_errors: yes
+
+- name: Delete namespace if exists
+  k8s:
+    api_version: v1
+    kind: namespace
+    name: 'openshift-sriov-network-operator'
+    state: absent
+  ignore_errors: yes
