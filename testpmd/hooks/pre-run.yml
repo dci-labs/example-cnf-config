@@ -1,18 +1,33 @@
 ---
-- name: Check if namespace exists
+- name: Check if example_cnf_namespace namespace exists
   k8s_info:
     api_version: v1
     kind: namespace
     name: "{{ dci_openshift_app_ns | default('example-cnf') }}"
   register: example_cnf_namespace
 
-- name: Delete namespace if exists
+- name: Delete example_cnf_namespace namespace if exists
   k8s:
     api_version: v1
     kind: namespace
     name: "{{ dci_openshift_app_ns | default('example-cnf') }}"
     state: absent
   when: example_cnf_namespace.resources|length > 0
+
+- name: Check if openshift-sriov-network-operator namespace exists
+  k8s_info:
+    api_version: v1
+    kind: namespace
+    name: "openshift-sriov-network-operator"
+  register: openshift_sriov_network_operator
+
+- name: Delete openshift-sriov-network-operator namespace if exists
+  k8s:
+    api_version: v1
+    kind: namespace
+    name: 'openshift-sriov-network-operator'
+    state: absent
+  when: openshift_sriov_network_operator.resources|length > 0
 
 - name: Get all nodes
   k8s_info:
@@ -46,6 +61,14 @@
 - name: Enable SR-IOV operator and Networks
   include_tasks: config/sriov.yaml
   when: enable_sriov|default(true)|bool
+
+# Need to check with S why this is required
+- name: Apply label to worker for cnf app
+  shell: |
+    export KUBECONFIG={{ kubeconfig_path }}
+    {{ oc_tool_path }} label node worker-0 examplecnf.openshift.io/trex=""
+    {{ oc_tool_path }} label node worker-1 examplecnf.openshift.io/testpmd=""
+    {{ oc_tool_path }} label node worker-2 examplecnf.openshift.io/testpmd=""
 
 - name: Checkout Example CNF deployment role
   git:
