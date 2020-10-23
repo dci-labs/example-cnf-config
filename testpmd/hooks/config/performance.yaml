@@ -51,7 +51,7 @@
 - name: Apply label to worker mcp
   shell: |
     export KUBECONFIG={{ kubeconfig_path }}
-    {{ oc_tool_path }}/oc label mcp worker machineconfiguration.openshift.io/role=worker --overwrite
+    {{ oc_tool_path }} label mcp worker machineconfiguration.openshift.io/role=worker --overwrite
 
 ########## Add all the PerformanceProfile creations in this block #############
 
