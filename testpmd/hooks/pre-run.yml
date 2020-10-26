@@ -1,12 +1,12 @@
 ---
-- name: Check if example_cnf_namespace namespace exists
+- name: Check if example_cnf namespace exists
   k8s_info:
     api_version: v1
     kind: namespace
     name: "{{ dci_openshift_app_ns | default('example-cnf') }}"
   register: example_cnf_namespace
 
-- name: Delete example_cnf_namespace namespace if exists
+- name: Delete example_cnf namespace if exists
   k8s:
     api_version: v1
     kind: namespace

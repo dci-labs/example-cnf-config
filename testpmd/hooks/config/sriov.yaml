@@ -103,6 +103,7 @@
     kind: Node
   register: nodes
   no_log: true
+
 - name: Get one worker node
   set_fact:
     worker_node: "{{ item.metadata.name }}"
@@ -125,13 +126,6 @@
     - "state.resources[0].spec.interfaces|length > 0"
     - "'syncStatus' in state.resources[0].status"
     - "state.resources[0].status.syncStatus == 'Succeeded'"
-- name: Check all nodes are in schedulable state
-  k8s_info:
-    kind: Node
-    field_selectors:
-      - spec.unschedulable=true
-  register: nodes
-  retries: 300
-  delay: 10
-  until: nodes.resources|length == 0
-  failed_when: nodes.resources|length != 0
+
+- name: Check nodes
+  include_tasks: nodes-ok.yml
