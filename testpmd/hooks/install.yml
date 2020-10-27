@@ -1,13 +1,12 @@
 ---
 - name: 'Install required rpm packages'
   package:
-    name: "{{ item }}"
+    name:
+      - git
+      - make
+      - python3-openshift
+      - python3-pyyaml
     state: latest
-  loop:
-    - git
-    - make
-    - python3-openshift
-    - python3-pyyaml
   become: true
 
 - name: Deploy NFV Example CNF catalog
