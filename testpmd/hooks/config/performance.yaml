@@ -31,7 +31,7 @@
         name: performance-addon-operator-subscription
         namespace: openshift-performance-addon
       spec:
-        channel: "{{ ocp_version }}"
+        channel: "{{ ocp_version|string }}"
         name: performance-addon-operator
         source: "{{ redhat_catalog_source }}"
         sourceNamespace: openshift-marketplace
@@ -47,10 +47,11 @@
   until: "csv.resources|length == 1 and csv.resources[0].status.phase == 'Succeeded'"
   failed_when: "csv.resources|length != 1 or csv.resources[0].status.phase != 'Succeeded'"
 
+# TODO(skramaja): This workaround is required only for ocp versions <= 4.5
 - name: Apply label to worker mcp
   shell: |
     export KUBECONFIG={{ kubeconfig_path }}
-    oc label mcp worker machineconfiguration.openshift.io/role=worker --overwrite
+    {{ oc_tool_path }} label mcp worker machineconfiguration.openshift.io/role=worker --overwrite
 
 ########## Add all the PerformanceProfile creations in this block #############
 
@@ -74,6 +75,7 @@
   set_fact:
     profile_name: "{{ profiles.resources[0].metadata.name }}"
   when: profiles.resources|length == 1
+
 - name: Check if one (only one) PerformanceProfile is present
   fail:
     msg: "One PerformanceProfile (profiles.resources|length) is required"
@@ -85,6 +87,7 @@
     # TODO: Remove this delay once valid events are catpured
     - pause:
         seconds: 10
+
     - name: Check for KubeletConfig creation
       k8s_info:
         api: machineconfiguration.openshift.io/v1
@@ -96,6 +99,7 @@
       delay: 5
       until: "kubelet.resources|length == 1"
       failed_when: "kubelet.resources|length != 1"
+
     - name: Check for MachineConfig creation
       k8s_info:
         api: machineconfiguration.openshift.io/v1
@@ -107,12 +111,15 @@
       delay: 5
       until: "machine.resources|length == 1"
       failed_when: "machine.resources|length != 1"
+
     - name: Set performance profile MachineConfig time
       set_fact:
         perf_machine_created: "{{ machine.resources[0].metadata.creationTimestamp }}"
+
     - name: Give a delay for the worker config to be rendered after performance MachineConfig is created
       pause:
         seconds: 10
+
     - name: Get all MachineConfigs
       k8s_info:
         api: machineconfiguration.openshift.io/v1
@@ -120,6 +127,7 @@
         namespace: default
       register: mc_list
       no_log: true
+
     - name: Get rendered-worker name
       set_fact:
         worker_machine_id: "{{ item.metadata.name }}"
@@ -129,6 +137,7 @@
         - "item.metadata.creationTimestamp > perf_machine_created"
       loop: "{{ mc_list.resources }}"
       no_log: true
+
     - name: Check if rendered-worker is created with performance profile configuration
       fail:
         msg: "rendered-worker is not updated with performance profile"
@@ -138,13 +147,6 @@
     # a wait is required for first node to be in that state
     - pause:
         seconds: 15
-    - name: Check all nodes are in schedulable state
-      k8s_info:
-        kind: Node
-        field_selectors:
-          - spec.unschedulable=true
-      register: nodes
-      retries: 300
-      delay: 10
-      until: nodes.resources|length == 0
-      failed_when: nodes.resources|length != 0
+
+    - name: Check nodes
+      include_tasks: nodes-ok.yml

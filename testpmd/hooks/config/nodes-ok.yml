@@ -1,0 +1,11 @@
+---
+- name: Check all nodes are in schedulable state
+  k8s_info:
+    kind: Node
+    field_selectors:
+      - spec.unschedulable=true
+  register: nodes
+  retries: 300
+  delay: 10
+  until: "'resources' in nodes and nodes.resources|length == 0"
+  failed_when: "'resources' not in nodes or nodes.resources|length != 0"
