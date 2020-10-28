@@ -8,7 +8,7 @@
     kind: MachineConfigPool
     name: master
   register: mcp_master
-  retries: 150
+  retries: 240
   delay: 10
   until:
     - "mcp_master.resources|length == 1"
@@ -21,7 +21,7 @@
     kind: MachineConfigPool
     name: worker
   register: mcp_worker
-  retries: 150
+  retries: 240
   delay: 10
   until:
     - "mcp_worker.resources|length == 1"
@@ -36,7 +36,7 @@
     field_selectors:
       - spec.unschedulable=true
   register: nodes
-  retries: 150
+  retries: 240
   delay: 10
   until: "'resources' in nodes and nodes.resources|length == 0"
   failed_when: "'resources' not in nodes or nodes.resources|length != 0"
