@@ -1,7 +1,7 @@
 ---
 - name: Wait for 15 seconds to allow the update process to start
   pause:
-    seconds 15
+    seconds: 15
 
 - name: Check the worker nodes managed by MCP are updated and ready
   k8s_info:
