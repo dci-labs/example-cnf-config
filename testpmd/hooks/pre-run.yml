@@ -62,13 +62,15 @@
   include_tasks: config/sriov.yaml
   when: enable_sriov|default(true)|bool
 
+# TODO(skramaja): labelling should be applied within the example cnf label role.
+# Commenting out for now to validate it.
 # Need to check with S why this is required
-- name: Apply label to worker for cnf app
-  shell: |
-    export KUBECONFIG={{ kubeconfig_path }}
-    {{ oc_tool_path }} label node worker-0 examplecnf.openshift.io/trex=""
-    {{ oc_tool_path }} label node worker-1 examplecnf.openshift.io/testpmd=""
-    {{ oc_tool_path }} label node worker-2 examplecnf.openshift.io/testpmd=""
+#- name: Apply label to worker for cnf app
+#  shell: |
+#    export KUBECONFIG={{ kubeconfig_path }}
+#    {{ oc_tool_path }} label node worker-0 examplecnf.openshift.io/trex=""
+#    {{ oc_tool_path }} label node worker-1 examplecnf.openshift.io/testpmd=""
+#    {{ oc_tool_path }} label node worker-2 examplecnf.openshift.io/testpmd=""
 
 - name: Checkout Example CNF deployment role
   git:
