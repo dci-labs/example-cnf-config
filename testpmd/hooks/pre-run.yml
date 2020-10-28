@@ -6,13 +6,13 @@
     name: "{{ dci_openshift_app_ns | default('example-cnf') }}"
   register: example_cnf_namespace
 
-- name: Delete example_cnf namespace if exists
-  k8s:
-    api_version: v1
-    kind: namespace
-    name: "{{ dci_openshift_app_ns | default('example-cnf') }}"
-    state: absent
-  when: example_cnf_namespace.resources|length > 0
+#- name: Delete example_cnf namespace if exists
+#  k8s:
+#    api_version: v1
+#    kind: namespace
+#    name: "{{ dci_openshift_app_ns | default('example-cnf') }}"
+#    state: absent
+#  when: example_cnf_namespace.resources|length > 0
 
 # TODO(skramaja): Deleting sriov operator namespace is not required, need to discuss
 # the need for this cleanup before starting and enhance it to delete only the sriov

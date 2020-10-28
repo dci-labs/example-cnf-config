@@ -1,11 +1,11 @@
-- name: Delete namespace if exists
-  k8s:
-    api_version: v1
-    kind: namespace
-    name: "{{ dci_openshift_app_ns | default('example-cnf') }}"
-    state: absent
-  ignore_errors: yes
-
+#- name: Delete namespace if exists
+#  k8s:
+#    api_version: v1
+#    kind: namespace
+#    name: "{{ dci_openshift_app_ns | default('example-cnf') }}"
+#    state: absent
+#  ignore_errors: yes
+#
 # TODO(skramaja): Eventhough we have integrated sriov-operator with example-cnf
 # config, sriov operator namespace should not be deleted as it is a cluster wide
 # lifetime. Only the resource managed by sriov operator like SriovNetwork and
