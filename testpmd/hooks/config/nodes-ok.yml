@@ -13,7 +13,8 @@
   until:
     - "mcp_worker.resources|length == 1"
     - "'status' in mcp_worker.resources[0]"
-    - "mcp_worker.resources[0].status.readyMachineCount == mcp_worker.resources[0].status.updatedMachineCount"
+    - "mcp_worker.resources[0].status.readyMachineCount == mcp_worker.resources[0].status.machineCount"
+    - "mcp_worker.resources[0].status.updatedMachineCount == mcp_worker.resources[0].status.machineCount"
 
 - name: Check all nodes are in schedulable state
   k8s_info:
