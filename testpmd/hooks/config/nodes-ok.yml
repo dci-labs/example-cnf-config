@@ -11,6 +11,7 @@
   retries: 240
   delay: 10
   until:
+    - "'resources' in mcp_master"
     - "mcp_master.resources|length == 1"
     - "'status' in mcp_master.resources[0]"
     - "mcp_master.resources[0].status.readyMachineCount == mcp_master.resources[0].status.machineCount"
@@ -24,6 +25,7 @@
   retries: 240
   delay: 10
   until:
+    - "'resources' in mcp_worker"
     - "mcp_worker.resources|length == 1"
     - "'status' in mcp_worker.resources[0]"
     - "mcp_worker.resources[0].status.readyMachineCount == mcp_worker.resources[0].status.machineCount"
