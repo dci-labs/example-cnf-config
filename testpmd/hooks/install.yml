@@ -10,13 +10,9 @@
   become: true
 
 - name: Deploy NFV Example CNF catalog
-  environment:
-    K8S_AUTH_KUBECONFIG: "{{ kubeconfig_path }}"
   include_role:
     name: "{{ dci_config_dir }}/hooks/nfv-example-cnf-deploy/roles/example-cnf-catalog"
 
 - name: Label the nodes for running testpmd and trex
-  environment:
-    K8S_AUTH_KUBECONFIG: "{{ kubeconfig_path }}"
   include_role:
     name: "{{ dci_config_dir }}/hooks/nfv-example-cnf-deploy/roles/example-cnf-labels"

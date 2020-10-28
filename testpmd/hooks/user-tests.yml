@@ -1,12 +1,8 @@
 ---
 - name: Deploy the Example CNF applications
-  environment:
-    K8S_AUTH_KUBECONFIG: "{{ kubeconfig_path }}"
   include_role:
     name: "{{ dci_config_dir }}/hooks/nfv-example-cnf-deploy/roles/example-cnf-app"
 
 - name: Run migration test
-  environment:
-    K8S_AUTH_KUBECONFIG: "{{ kubeconfig_path }}"
   include_role:
     name: "{{ dci_config_dir }}/hooks/nfv-example-cnf-deploy/roles/example-cnf-validate"
