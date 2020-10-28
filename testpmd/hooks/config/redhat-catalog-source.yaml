@@ -60,13 +60,5 @@
     - name: Wait for content policy to start applying on nodes
       pause:
         seconds: 30
-    - name: Check all nodes are in schedulable state
-      k8s_info:
-        kind: Node
-        field_selectors:
-          - spec.unschedulable=true
-      register: nodes
-      retries: 300
-      delay: 10
-      until: nodes.resources|length == 0
-      failed_when: nodes.resources|length != 0
+    - name: Check nodes
+      include_tasks: nodes-ok.yml
