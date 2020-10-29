@@ -1,8 +1,4 @@
 ---
-# TODO(skramaja): Explore the posibility of increasing the tolerance level of not-ready nodes
-# higher to make the update process faster.
-# oc patch mcp worker --type=merge -p '{"spec":{"maxUnavailable":2}}'
-
 - name: Check the master nodes managed by MCP are updated and ready
   k8s_info:
     kind: MachineConfigPool

@@ -63,6 +63,11 @@
     provision_cache_store: "/opt/cache"
   when: provision_cache_store is undefined
 
+- name: Increase maxUnavailable count to 2 which will fasten the node update
+  shell: |
+    export KUBECONFIG={{ kubeconfig_path }}
+    {{ oc_tool_path }} patch mcp worker --type=merge -p '{"spec":{"maxUnavailable":2}}'
+
 - name: Deploy Red Hat Catalog Source
   include_tasks: config/redhat-catalog-source.yaml
 
@@ -73,6 +78,11 @@
 - name: Enable SR-IOV operator and Networks
   include_tasks: config/sriov.yaml
   when: enable_sriov|default(true)|bool
+
+- name: Reset maxUnavailable count to default value 1
+  shell: |
+    export KUBECONFIG={{ kubeconfig_path }}
+    {{ oc_tool_path }} patch mcp worker --type=merge -p '{"spec":{"maxUnavailable":1}}'
 
 # TODO(skramaja): labelling should be applied within the example cnf label role.
 # Commenting out for now to validate it.
