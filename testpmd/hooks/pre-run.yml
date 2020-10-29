@@ -1,37 +1,4 @@
 ---
-- name: Check if example_cnf namespace exists
-  k8s_info:
-    api_version: v1
-    kind: namespace
-    name: "{{ dci_openshift_app_ns | default('example-cnf') }}"
-  register: example_cnf_namespace
-
-#- name: Delete example_cnf namespace if exists
-#  k8s:
-#    api_version: v1
-#    kind: namespace
-#    name: "{{ dci_openshift_app_ns | default('example-cnf') }}"
-#    state: absent
-#  when: example_cnf_namespace.resources|length > 0
-
-# TODO(skramaja): Deleting sriov operator namespace is not required, need to discuss
-# the need for this cleanup before starting and enhance it to delete only the sriov
-# resources if required.
-    #- name: Check if openshift-sriov-network-operator namespace exists
-    #  k8s_info:
-    #    api_version: v1
-    #    kind: namespace
-    #    name: "openshift-sriov-network-operator"
-    #  register: openshift_sriov_network_operator
-    #
-    #- name: Delete openshift-sriov-network-operator namespace if exists
-    #  k8s:
-    #    api_version: v1
-    #    kind: namespace
-    #    name: 'openshift-sriov-network-operator'
-    #    state: absent
-    #  when: openshift_sriov_network_operator.resources|length > 0
-
 - name: Get all nodes
   k8s_info:
     kind: Node
@@ -83,16 +50,6 @@
   shell: |
     export KUBECONFIG={{ kubeconfig_path }}
     {{ oc_tool_path }} patch mcp worker --type=merge -p '{"spec":{"maxUnavailable":1}}'
-
-# TODO(skramaja): labelling should be applied within the example cnf label role.
-# Commenting out for now to validate it.
-# Need to check with S why this is required
-#- name: Apply label to worker for cnf app
-#  shell: |
-#    export KUBECONFIG={{ kubeconfig_path }}
-#    {{ oc_tool_path }} label node worker-0 examplecnf.openshift.io/trex=""
-#    {{ oc_tool_path }} label node worker-1 examplecnf.openshift.io/testpmd=""
-#    {{ oc_tool_path }} label node worker-2 examplecnf.openshift.io/testpmd=""
 
 - name: Checkout Example CNF deployment role
   git:

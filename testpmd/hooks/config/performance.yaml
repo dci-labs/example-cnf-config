@@ -146,8 +146,6 @@
         msg: "rendered-worker is not updated with performance profile"
       when: worker_machine_id is undefined
 
-    # TODO: Test if this nodes will go to unschedulable state immediately or
-    # a wait is required for first node to be in that state
     - pause:
         seconds: 15
 
