@@ -44,8 +44,11 @@
   register: csv
   retries: 30
   delay: 5
-  until: "csv.resources|length == 1 and csv.resources[0].status.phase == 'Succeeded'"
-  failed_when: "csv.resources|length != 1 or csv.resources[0].status.phase != 'Succeeded'"
+  until:
+    - "csv.resources|length == 1"
+    - "'status' in csv.resources[0]"
+    - "'phase' in csv.resources[0].status"
+    - "csv.resources[0].status.phase == 'Succeeded'"
 
 # TODO(skramaja): This workaround is required only for ocp versions <= 4.5
 - name: Apply label to worker mcp
