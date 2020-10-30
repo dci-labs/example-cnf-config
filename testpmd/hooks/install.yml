@@ -11,8 +11,8 @@
 
 - name: Deploy NFV Example CNF catalog
   include_role:
-    name: "{{ dci_config_dir }}/hooks/nfv-example-cnf-deploy/roles/example-cnf-catalog"
+    name: example-cnf-catalog
 
 - name: Label the nodes for running testpmd and trex
   include_role:
-    name: "{{ dci_config_dir }}/hooks/nfv-example-cnf-deploy/roles/example-cnf-labels"
+    name: example-cnf-labels
