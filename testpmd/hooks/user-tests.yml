@@ -2,7 +2,7 @@
 # TODO(skramaja): Move this to install as this is not a test
 - name: Deploy the Example CNF applications
   include_role:
-    name: "{{ dci_config_dir }}/hooks/nfv-example-cnf-deploy/roles/example-cnf-app"
+    name: example-cnf-app
 
 - name: Wait for trex to stablize
   pause:
@@ -10,4 +10,4 @@
 
 - name: Run migration test
   include_role:
-    name: "{{ dci_config_dir }}/hooks/nfv-example-cnf-deploy/roles/example-cnf-validate"
+    name: example-cnf-validate
