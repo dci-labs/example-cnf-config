@@ -1,4 +1,4 @@
 ---
 - name: Run migration test
   include_role:
-    name: "{{ dci_config_dir }}/hooks/nfv-example-cnf-deploy/roles/example-cnf-validate"
+    name: example-cnf-validate
