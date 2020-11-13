@@ -16,3 +16,8 @@
 - name: Label the nodes for running testpmd and trex
   include_role:
     name: example-cnf-labels
+
+- name: Deploy the Example CNF applications
+  include_role:
+    name: example-cnf-app
+
