@@ -17,6 +17,9 @@
       catalog_registry_port: "5000"
     when: catalog_registry_port is undefined
   - set_fact:
+      catalog_repo_name: "olm"
+    when: catalog_repo_name is undefined
+  - set_fact:
       catalog_image_name: "redhat-operators"
     when: catalog_image_name is undefined
   - set_fact:
@@ -33,7 +36,7 @@
           namespace: openshift-marketplace
         spec:
           sourceType: grpc
-          image: "{{ catalog_registry }}:{{ catalog_registry_port }}/olm/{{ catalog_image_name }}:{{ catalog_image_version }}"
+          image: "{{ catalog_registry }}:{{ catalog_registry_port }}/{{ catalog_repo_name }}/{{ catalog_image_name }}:{{ catalog_image_version }}"
           displayName: "Red Hat Marketplace"
           publisher: grpc
   - name: Wait for sriov-network-operator packagemanifests creation
