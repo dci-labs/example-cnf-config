@@ -30,6 +30,35 @@
     provision_cache_store: "/opt/cache"
   when: provision_cache_store is undefined
 
+- name: Get oc version output
+  shell: |
+    {{ oc_tool_path }} --kubeconfig {{ kubeconfig_path }} version
+  register: oc_version_str
+- name: Get OCP version
+  set_fact:
+     ocp_version: "{{ '.'.join(item.split(':')[1].strip().split('.')[0:2]) }}"
+     ocp_version_maj: "{{ item.split(':')[1].strip().split('.')[0] }}"
+     ocp_version_min: "{{ item.split(':')[1].strip().split('.')[1] }}"
+  when: "'Server Version' in item"
+  loop: "{{ oc_version_str.stdout_lines }}"
+- name: Fail if the ocp version is not set
+  fail:
+    msg: "OCP version is not set"
+  when: not ocp_version
+
+- include_vars: version/ocp4_4.yaml
+  when:
+    - ocp_version_maj|int == 4
+    - ocp_version_min|int == 4
+- include_vars: version/ocp4_5.yaml
+  when:
+    - ocp_version_maj|int == 4
+    - ocp_version_min|int == 5
+- include_vars: version/ocp_latest.yaml
+  when:
+    - ocp_version_maj|int == 4
+    - ocp_version_min|int >= 6
+
 - name: Increase maxUnavailable count to 2 which will fasten the node update
   shell: |
     export KUBECONFIG={{ kubeconfig_path }}
@@ -55,6 +84,7 @@
   git:
     repo: 'https://github.com/rh-nfv-int/nfv-example-cnf-deploy.git'
     dest: "{{ dci_config_dir }}/hooks/nfv-example-cnf-deploy"
+    version: "{{ example_cnf_deploy_script_version|default('master') }}"
     update: yes
   register: gitresult
 
