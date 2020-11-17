@@ -3,3 +3,21 @@
   include_role:
     name: example-cnf-validate
   when: run_migration_test|default(true)|bool
+
+- name: Get logs from pods
+  community.kubernetes.k8s_log:
+    namespace: example-cnf
+    label_selectors:
+    - "{{ item }}"
+  register: pods
+  loop:
+    - app=testpmd
+    - app=trex
+    - example-cnf-type=trex-operator
+    - example-cnf-type=testpmd-operator
+
+- name: Write logs to files
+  copy:
+    content: "{{ item.log_lines }}"
+    dest: "{{ job_logs.path }}/{{ item.item | replace('=', '_') }}.log"
+  loop: "{{ pods.results }}"
