@@ -2,3 +2,4 @@
 - name: Run migration test
   include_role:
     name: example-cnf-validate
+  when: run_migration_test|default(true)|bool
