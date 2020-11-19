@@ -4,20 +4,18 @@
     name: example-cnf-validate
   when: run_migration_test|default(true)|bool
 
-- name: Get logs from pods
-  community.kubernetes.k8s_log:
+- name: Get a list of all pods
+  k8s_info:
+    api_version: v1
+    kind: Pod
     namespace: example-cnf
-    label_selectors:
-    - "{{ item }}"
-  register: pods
-  loop:
-    - app=testpmd
-    - app=trex
-    - example-cnf-type=trex-operator
-    - example-cnf-type=testpmd-operator
+  register: pod_list
 
-- name: Write logs to files
-  copy:
-    content: "{{ item.log_lines }}"
-    dest: "{{ job_logs.path }}/{{ item.item | replace('=', '_') }}.log"
-  loop: "{{ pods.results }}"
+- name: Print pod names
+  debug:
+    msg: "pod_list: {{ pod_list | json_query('resources[*].metadata.name')  }} "
+
+- name: Get logs from each pods
+  shell: |
+    {{ oc_tool_path }} logs --namespace=example-cnf --all-containers=true {{ item }} > {{ job_logs.path }}/{{ item }}.log
+  loop: "{{ pod_list | json_query('resources[*].metadata.name') }}"
