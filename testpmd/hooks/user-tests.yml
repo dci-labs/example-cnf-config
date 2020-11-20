@@ -4,18 +4,9 @@
     name: example-cnf-validate
   when: run_migration_test|default(true)|bool
 
-- name: Get a list of all pods
-  k8s_info:
-    api_version: v1
-    kind: Pod
-    namespace: example-cnf
-  register: pod_list
-
-- name: Print pod names
-  debug:
-    msg: "pod_list: {{ pod_list | json_query('resources[*].metadata.name')  }} "
-
-- name: Get logs from each pods
-  shell: |
-    {{ oc_tool_path }} logs --namespace=example-cnf --all-containers=true {{ item }} > {{ job_logs.path }}/{{ item }}.log
-  loop: "{{ pod_list | json_query('resources[*].metadata.name') }}"
+- name: Get logs from pods
+  include_role:
+    name: get-logs-from-namespace
+  vars:
+    get_logs_ns: example-cnf
+    get_logs_folder: "{{ job_logs.path }}"
