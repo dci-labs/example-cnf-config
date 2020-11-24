@@ -64,6 +64,13 @@
     export KUBECONFIG={{ kubeconfig_path }}
     {{ oc_tool_path }} patch mcp worker --type=merge -p '{"spec":{"maxUnavailable":2}}'
 
+- k8s_info:
+    kind: CatalogSource
+    namespace: openshift-marketplace
+    api: operators.coreos.com/v1alpha1"
+  register: catalog
+- debug: var=catalog
+
 - name: Deploy Red Hat Catalog Source
   include_tasks: config/redhat-catalog-source.yaml
 
