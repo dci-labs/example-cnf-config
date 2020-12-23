@@ -52,7 +52,7 @@
 - name: Checkout Example CNF deployment role
   git:
     repo: 'https://github.com/rh-nfv-int/nfv-example-cnf-deploy.git'
-    dest: "{{ dci_config_dir }}/hooks/nfv-example-cnf-deploy"
+    dest: "{{ dci_config_dir }}/hooks/{{ cluster_name }}/nfv-example-cnf-deploy"
     version: "{{ example_cnf_deploy_script_version|default('master') }}"
     update: yes
   register: gitresult
