@@ -5,7 +5,7 @@
 
 - name: Get oc version output
   shell: |
-    {{ oc_tool_path }} version
+    {{ oc_tool_path }} --kubeconfig {{ kubeconfig_path }} version
   register: oc_version_str
 
 - name: Get OCP version
