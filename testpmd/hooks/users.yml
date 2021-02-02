@@ -1,0 +1,6 @@
+---
+# List of users and namespaces
+users:
+  - name: example_cnf
+    namespace: example-cnf
+...
