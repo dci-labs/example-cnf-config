@@ -2,4 +2,7 @@
 - name: Run migration test
   include_role:
     name: "{{ dci_config_dir }}/hooks/{{ cluster_name }}/nfv-example-cnf-deploy/roles/example-cnf-validate"
-  when: run_migration_test|default(true)|bool
+  when:
+    - run_migration_test|default(true)|bool
+
+...

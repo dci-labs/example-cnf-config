@@ -1,18 +1,4 @@
 ---
-- name: 'Install required rpm packages'
-  package:
-    name:
-      - git
-      - make
-      - python3-openshift
-      - python3-pyyaml
-    state: latest
-  become: true
-
-- name: Deploy NFV Example CNF catalog
-  include_role:
-    name: "{{ dci_config_dir }}/hooks/{{ cluster_name }}/nfv-example-cnf-deploy/roles/example-cnf-catalog"
-
 - name: Label the nodes for running testpmd and trex
   include_role:
     name: "{{ dci_config_dir }}/hooks/{{ cluster_name }}/nfv-example-cnf-deploy/roles/example-cnf-labels"
@@ -24,3 +10,4 @@
   include_role:
     name: "{{ dci_config_dir }}/hooks/{{ cluster_name }}/nfv-example-cnf-deploy/roles/example-cnf-app"
 
+...

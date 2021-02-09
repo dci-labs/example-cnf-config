@@ -1,7 +1,0 @@
-#- name: Delete namespace if exists
-#  k8s:
-#    api_version: v1
-#    kind: namespace
-#    name: "{{ dci_openshift_app_ns | default('example-cnf') }}"
-#    state: absent
-#  ignore_errors: yes

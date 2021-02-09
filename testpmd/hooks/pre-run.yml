@@ -1,8 +1,13 @@
 ---
+- name: "Set working namespace"
+  set_fact:
+    cnf_namespace: "example-cnf"
+
 - name: Get oc version output
   shell: |
     {{ oc_tool_path }} --kubeconfig {{ kubeconfig_path }} version
   register: oc_version_str
+
 - name: Get OCP version
   set_fact:
      ocp_version: "{{ '.'.join(item.split(':')[1].strip().split('.')[0:2]) }}"
@@ -10,6 +15,7 @@
      ocp_version_min: "{{ item.split(':')[1].strip().split('.')[1] }}"
   when: "'Server Version' in item"
   loop: "{{ oc_version_str.stdout_lines }}"
+
 - name: Fail if the ocp version is not set
   fail:
     msg: "OCP version is not set"
@@ -58,3 +64,19 @@
   register: gitresult
 
 - debug: msg="Git hash is {{ gitresult.after }}"
+
+- name: 'Install required rpm packages'
+  package:
+    name:
+      - git
+      - make
+      - python3-openshift
+      - python3-pyyaml
+    state: latest
+  become: true
+
+- name: Deploy NFV Example CNF catalog
+  include_role:
+    name: "{{ dci_config_dir }}/hooks/{{ cluster_name }}/nfv-example-cnf-deploy/roles/example-cnf-catalog"
+
+...
