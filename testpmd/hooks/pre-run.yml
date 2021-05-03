@@ -23,8 +23,8 @@
 
 - name: Create example-cnf facts
   set_fact:
-    operator_version: v0.2.1
-    app_version: v0.2.0
+    operator_version: v0.2.4
+    app_version: v0.2.2
     cnf_app_networks:
       - name: intel-numa0-net1
         count: 2
@@ -47,7 +47,7 @@
     repo: "https://github.com/rh-nfv-int/nfv-example-cnf-deploy.git"
     dest: "{{ dci_config_dir }}/hooks/{{ cluster_name }}/nfv-example-cnf-deploy"
     version: "{{ example_cnf_deploy_script_version|default('master') }}"
-    update: yes
+    update: true
   register: gitresult
 
 - debug: msg="Git hash is {{ gitresult.after }}"
@@ -61,6 +61,34 @@
       - python3-pyyaml
     state: latest
   become: true
+
+- name: Get ImageContentSourcePolicy if any
+  k8s_info:
+    api: operators.coreos.com/v1alpha1
+    kind: ImageContentSourcePolicy
+  register: icsp
+
+- name: Create ImageContentSourcePolicy when disconnected
+  block:
+    - name: Get Mirror from ImageContentSourcePolicy
+      set_fact:
+        example_cnf_config_local_registry: >
+          {{ icsp.resources[0].repositoryDigestMirrors[0].mirrors[0] |
+          regex_replace('(https?://)?([^/]*)/.*', '\2') }
+
+    - name: Set ImageContentSourcePolicy for example-cnf
+      k8s:
+        definition:
+          apiVersion: operator.openshift.io/v1alpha1
+          kind: ImageContentSourcePolicy
+          metadata:
+            name: example-cnf-mirror
+          spec:
+            repositoryDigestMirrors:
+              - mirrors:
+                  - "{{ example_cnf_config_local_registry }}/rh-nfv-int"
+                source: quay.io/rh-nfv-int
+  when: icsp.resources|length > 0
 
 - name: Deploy NFV Example CNF catalog
   include_role:
