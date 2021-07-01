@@ -1,7 +1,7 @@
 ---
 - name: "Set working namespace"
   set_fact:
-    cnf_namespace: "example-cnf"
+    cnf_namespace: "{{ dci_openshift_app_ns }}"
 
 - name: Get oc version output
   shell: |
