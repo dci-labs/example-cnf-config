@@ -68,7 +68,7 @@
     example_cnf_index_image: quay.io/rh-nfv-int/nfv-example-cnf-catalog:v0.2.6
   when:
     - dci_disconnected is defined
-    - dci_disconnected is true
+    - dci_disconnected|bool
 
 - name: Deploy NFV Example CNF catalog
   include_role:
