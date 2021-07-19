@@ -25,13 +25,13 @@
     cmd: >
       oc adm catalog mirror
       -a {{ mrn_pull_secret }}
-      --to-manifests={{ mnr_manifest_dir }}
+      --to-manifests={{ mrn_manifest_dir.path }}
       {{ mrn_mirror_index_image }}
       {{ mrn_local_registry }}
 
 - name: "Apply ImageContentSourcePolicy"
   k8s:
-    src: "{{ mrn_manifest_dir }}/imageContentSourcePolicy.yaml"
+    src: "{{ mrn_manifest_dir.path }}/imageContentSourcePolicy.yaml"
   notify: "Delete temporary directories"
 
 - name: "Wait for a moment to machine configs (if any) to render"
