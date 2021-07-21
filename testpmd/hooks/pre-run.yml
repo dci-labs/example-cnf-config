@@ -62,6 +62,15 @@
     state: latest
   become: true
 
+- name: Mirror rh-nfv images when disconnected
+  include_role:
+    name: "{{ dci_config_dir }}/hooks/roles/mirror-rh-nfv"
+  vars:
+    example_cnf_index_image: quay.io/rh-nfv-int/nfv-example-cnf-catalog:v0.2.6
+  when:
+    - dci_disconnected is defined
+    - dci_disconnected|bool
+
 - name: Deploy NFV Example CNF catalog
   include_role:
     name: "{{ dci_config_dir }}/hooks/{{ cluster_name }}/nfv-example-cnf-deploy/roles/example-cnf-catalog"

@@ -1,0 +1,49 @@
+---
+- name: "Mirror index image"
+  shell:
+    cmd: >
+      skopeo copy 
+      --all
+      --authfile {{ mrn_pull_secret }}
+      --dest-tls-verify=false
+      --remove-signatures
+      docker://{{ mrn_index_image }}
+      docker://{{ mrn_mirror_index_image }}
+  register: copy
+  retries: 5
+  delay: 5
+  until:
+    - copy is not failed
+
+- name: "Create temp manifest dir"
+  tempfile:
+    state: directory
+  register: mrn_manifest_dir
+
+- name: "Mirror images from index"
+  shell:
+    cmd: >
+      oc adm catalog mirror
+      -a {{ mrn_pull_secret }}
+      --to-manifests={{ mrn_manifest_dir.path }}
+      {{ mrn_mirror_index_image }}
+      {{ mrn_local_registry }}
+
+- name: "Apply ImageContentSourcePolicy"
+  k8s:
+    src: "{{ mrn_manifest_dir.path }}/imageContentSourcePolicy.yaml"
+  notify: "Delete temporary directories"
+
+- name: "Wait for a moment to machine configs (if any) to render"
+  pause:
+    seconds: 30
+
+- name: "Wait for ALL nodes to be in a Done state"
+  k8s_info:
+    api: v1
+    kind: Node
+  register: cluster_nodes
+  until: '"Working" not in cluster_nodes.resources | json_query("[].metadata.annotations.\"machineconfiguration.openshift.io/state\"")'
+  retries: 240
+  delay: 10
+  failed_when: '"Degraded" in cluster_nodes.resources | json_query("[].metadata.annotations.\"machineconfiguration.openshift.io/state\"")'
