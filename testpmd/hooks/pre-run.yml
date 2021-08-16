@@ -54,7 +54,13 @@
     dest: "{{ dci_config_dir }}/hooks/{{ cluster_name }}/nfv-example-cnf-deploy"
     version: "{{ example_cnf_deploy_script_version|default('master') }}"
     update: yes
+    force: true
+  # On RHEL8 git clone can sporadically fail with OpenSSL SSL_read:
+  # SSL_ERROR_SYSCALL, errno 104.
   register: gitresult
+  retries: 3
+  delay: 10
+  until: not gitresult.failed
 
 - debug: msg="Git hash is {{ gitresult.after }}"
 
