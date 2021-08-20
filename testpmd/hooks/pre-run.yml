@@ -32,6 +32,7 @@
   set_fact:
     operator_version: "v0.2.8-1"
     example_cnf_index_image: "quay.io/tonyskapunk/nfv-example-cnf-catalog:v0.2.8-1"
+    repo_name: "tonyskapunk"
     app_version: v0.2.2
     cnf_app_networks:
       - name: intel-numa0-net1
