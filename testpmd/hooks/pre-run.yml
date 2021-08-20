@@ -24,13 +24,14 @@
 - name: Get example-cnf component details from job.components
   set_fact:
     operator_version: "{{ item['name'] }}"
-    example_cnf_index_image: "{{ item['data']['url'] }}:{{ item['name'] }}"
+    #example_cnf_index_image: "{{ item['data']['url'] }}:{{ item['name'] }}"
   with_items: "{{ hostvars.localhost.job_info.job.components }}"
   when: item["type"] == "nfv-example-cnf-index"
 
 - name: Create example-cnf facts
   set_fact:
     operator_version: "v0.2.8-1"
+    example_cnf_index_image: "quay.io/tonyskapunk/nfv-example-cnf-catalog"
     app_version: v0.2.2
     cnf_app_networks:
       - name: intel-numa0-net1
@@ -79,5 +80,3 @@
 - name: Deploy NFV Example CNF catalog
   include_role:
     name: "{{ dci_config_dir }}/hooks/{{ cluster_name }}/nfv-example-cnf-deploy/roles/example-cnf-catalog"
-
-...
