@@ -30,6 +30,7 @@
 
 - name: Create example-cnf facts
   set_fact:
+    operator_version: "v0.2.8-1"
     app_version: v0.2.2
     cnf_app_networks:
       - name: intel-numa0-net1
