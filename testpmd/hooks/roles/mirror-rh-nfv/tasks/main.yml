@@ -29,6 +29,16 @@
       {{ mrn_mirror_index_image }}
       {{ mrn_local_registry }}
 
+- name: Add index image into ImageContentSourcePolicy
+  blockinfile:
+    path: "{{ mrn_manifest_dir.path }}/imageContentSourcePolicy.yaml"
+    state: present
+    marker: ""
+    block: |2
+        - mirrors:
+          - {{ mrn_mirror_index_image | regex_replace(':[^/]+$') }}
+          source: {{ mrn_index_image | regex_replace(':[^/]+$') }}
+
 - name: "Apply ImageContentSourcePolicy"
   k8s:
     src: "{{ mrn_manifest_dir.path }}/imageContentSourcePolicy.yaml"
