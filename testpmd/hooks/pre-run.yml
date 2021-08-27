@@ -21,10 +21,16 @@
     msg: "OCP version is not set"
   when: not ocp_version
 
+- name: Get example-cnf component details from job.components
+  set_fact:
+    operator_version: "{{ item['name'] }}"
+    example_cnf_index_image: "{{ item['data']['url'] }}:{{ item['name'] }}"
+  with_items: "{{ hostvars.localhost.job_info.job.components }}"
+  when: item["type"] == "nfv-example-cnf-index"
+
 - name: Create example-cnf facts
   set_fact:
-    operator_version: v0.2.6
-    app_version: v0.2.2
+    app_version: v0.2.3
     cnf_app_networks:
       - name: intel-numa0-net1
         count: 2
@@ -65,8 +71,6 @@
 - name: Mirror rh-nfv images when disconnected
   include_role:
     name: "{{ dci_config_dir }}/hooks/roles/mirror-rh-nfv"
-  vars:
-    example_cnf_index_image: quay.io/rh-nfv-int/nfv-example-cnf-catalog:v0.2.6
   when:
     - dci_disconnected is defined
     - dci_disconnected|bool
