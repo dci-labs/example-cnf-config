@@ -37,7 +37,7 @@
     packet_generator_networks:
       - name: intel-numa0-net2
         count: 2
-    example_cnf_deploy_script_version: master
+    example_cnf_deploy_script_version: b08cecf
     run_migration_test: false
     mac_workaround_enable: false
 
