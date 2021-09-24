@@ -65,6 +65,7 @@
       - make
       - python3-openshift
       - python3-pyyaml
+      - ansible-collection-community-kubernetes
     state: latest
   become: true
 
