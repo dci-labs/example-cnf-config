@@ -41,6 +41,13 @@
     run_migration_test: false
     mac_workaround_enable: false
 
+- name: "Create CNF Namespace"
+  k8s:
+    api_version: v1
+    kind: Namespace
+    state: present
+    name: "{{ cnf_namespace }}"
+
 - name: Set mac workround for ocp older than 4.6
   set_fact:
     mac_workaround_enable: true
