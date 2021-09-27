@@ -3,4 +3,9 @@
   include_role:
     name: "{{ dci_config_dir }}/hooks/{{ cluster_name }}/nfv-example-cnf-deploy/roles/example-cnf-app"
 
+- name: Apply configuration for CNF Cert Suite execution
+  include_role:
+    name: apply-cnf-cert-config
+  when: do_cnf_cert|default(false)|bool
+
 ...
