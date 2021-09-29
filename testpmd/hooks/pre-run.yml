@@ -48,6 +48,44 @@
     state: present
     name: "{{ cnf_namespace }}"
 
+# Expecting variables in an array on this form
+# sriov_network:
+#  - name: intel-numa0-net1
+#    vlan: 460
+#    policy: intel-numa0-policy1
+#    resource: intel_numa0_res1
+#    numvfs: 16
+#    mtu: 9000
+#    device_type: vfio-pci
+#    devices:
+#      - ens2f1#0-15
+# or
+#  - policy: intel-dpdk-node-policy
+#    resource: intelnics
+#    numvfs: 4
+#    vendor: 8086
+#    deviceid: 1592
+#    devices:
+#      - ens4f0
+#    rootdevices:
+#      - "0000:d8:00.0"
+#    nodeselector: '"node.openshift.io/nic_type": "intel810"'
+- name: "Create SriovNetworkNodePolicy for {{ sriov['policy'] }}"
+  k8s:
+    definition: "{{ lookup('template', 'templates/sriov-policy.yml.j2') }}"
+  loop: "{{ sriov_network }}"
+  loop_control:
+    loop_var: sriov
+  when: sriov_network is defined
+
+- name: "Create SriovNetwork for {{ sriov['name'] }}"
+  k8s:
+    definition: "{{ lookup('template', 'templates/sriov-network.yml.j2') }}"
+  loop: "{{ sriov_network }}"
+  loop_control:
+    loop_var: sriov
+  when: sriov_network is defined
+
 - name: Set mac workround for ocp older than 4.6
   set_fact:
     mac_workaround_enable: true
