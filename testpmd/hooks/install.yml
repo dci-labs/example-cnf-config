@@ -5,7 +5,7 @@
 
 - name: Apply configuration for CNF Cert Suite execution
   include_role:
-    name: apply-cnf-cert-config
+    name: "{{ dci_config_dir }}/hooks/roles/apply-cnf-cert-config"
   when: do_cnf_cert|default(false)|bool
 
 ...
