@@ -15,17 +15,17 @@
 - name: Tag pods with autodiscover labels to execute test suites
   shell: |
     set -ex
-    oc label pod -n "{{ app_ns }}" "{{ item.resources.pod.metadata.name }}" "{{ app_ns }}"/"{{ targetpodlabels_name }}"="{{ targetpodlabels_value }}" --overwrite
-    oc annotate pod -n "{{ app_ns }}" "{{ item.resources.pod.metadata.name }}" test-network-function.com/container_tests="[\"PRIVILEGED_POD\",\"PRIVILEGED_ROLE\"]" --overwrite
-  when: item.resources.pod.metadata.name|regex_search(cnfs_regexp)
-  loop: "{{ example_cnf_pod_list }}"
+    oc label pod -n "{{ app_ns }}" "{{ item.metadata.name }}" "{{ app_ns }}"/"{{ targetpodlabels_name }}"="{{ targetpodlabels_value }}" --overwrite
+    oc annotate pod -n "{{ app_ns }}" "{{ item.metadata.name }}" test-network-function.com/container_tests="[\"PRIVILEGED_POD\",\"PRIVILEGED_ROLE\"]" --overwrite
+  when: item.metadata.name|regex_search(cnfs_regexp)
+  loop: "{{ example_cnf_pod_list.resources }}"
 
 - name: Tag pods with autodiscover labels related to exclude connectivity features in test suites
   shell: |
     set -ex
-    oc label pod -n "{{ app_ns }}" "{{ item.resources.pod.metadata.name }}" test-network-function.com/skip_connectivity_tests=true --overwrite
-  when:  item.resources.pod.metadata.name|regex_search(exclude_connectivity_regexp)
-  loop: "{{ example_cnf_pod_list }}"
+    oc label pod -n "{{ app_ns }}" "{{ item.metadata.name }}" test-network-function.com/skip_connectivity_tests=true --overwrite
+  when:  item.metadata.name|regex_search(exclude_connectivity_regexp)
+  loop: "{{ example_cnf_pod_list.resources }}"
 
 # Label operators / TODO
 
