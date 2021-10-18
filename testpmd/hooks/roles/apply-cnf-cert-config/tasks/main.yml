@@ -12,7 +12,7 @@
 # In this case and the following, labels are included after deploying the pods. However, as stated here:
 # https://github.com/test-network-function/test-network-function#targetpodlabels
 # "It's highly recommended that the labels should be defined in pod definition rather than added after pod is created"
-- name: Tag pods with autodiscover labels to execute test suites
+- name: Tag pods with autodiscovery labels to execute test suites
   shell: |
     set -ex
     oc label pod -n "{{ app_ns }}" "{{ item.metadata.name }}" "{{ app_ns }}"/"{{ targetpodlabels_name }}"="{{ targetpodlabels_value }}" --overwrite
@@ -20,13 +20,29 @@
   when: item.metadata.name|regex_search(cnfs_regexp)
   loop: "{{ example_cnf_pod_list.resources }}"
 
-- name: Tag pods with autodiscover labels related to exclude connectivity features in test suites
+- name: Tag pods with autodiscovery labels related to exclude connectivity features in test suites
   shell: |
     set -ex
     oc label pod -n "{{ app_ns }}" "{{ item.metadata.name }}" test-network-function.com/skip_connectivity_tests=true --overwrite
   when:  item.metadata.name|regex_search(exclude_connectivity_regexp)
   loop: "{{ example_cnf_pod_list.resources }}"
 
-# Label operators / TODO
+# Label operators / WIP
+
+- name: Get CSVs from example-cnf namespace
+  k8s_info:
+    api_version: operators.coreos.com/v1alpha1
+    kind: ClusterServiceVersion
+    namespace: "{{ app_ns }}"
+  register: example_cnf_csv_list
+
+- name: Tag CSVs with autodiscovery labels to execute test suites
+  shell: |
+    set -ex
+    oc label csv -n "{{ app_ns }}" "{{ item.metadata.name }}" test-network-function.com/operator=target --overwrite
+    oc label csv -n "{{ app_ns }}" "{{ item.metadata.name }}" test-network-function.com/subscription_name=etcd --overwrite
+    oc annotate csv -n "{{ app_ns }}" "{{ item.metadata.name }}" test-network-function.com/operator_tests='["OPERATOR_STATUS"]' --overwrite
+  when: item.metadata.name|regex_search(operators_regexp)
+  loop: "{{ example_cnf_csv_list.resources }}"
 
 ...
