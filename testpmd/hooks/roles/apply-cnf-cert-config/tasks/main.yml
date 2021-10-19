@@ -27,7 +27,7 @@
   when:  item.metadata.name|regex_search(exclude_connectivity_regexp)
   loop: "{{ example_cnf_pod_list.resources }}"
 
-# Label operators / WIP
+# Label operators
 
 - name: Get CSVs from example-cnf namespace
   k8s_info:
@@ -36,11 +36,12 @@
     namespace: "{{ app_ns }}"
   register: example_cnf_csv_list
 
+# TODO: include correct subscription name
 - name: Tag CSVs with autodiscovery labels to execute test suites
   shell: |
     set -ex
     oc label csv -n "{{ app_ns }}" "{{ item.metadata.name }}" test-network-function.com/operator=target --overwrite
-    oc annotate csv -n "{{ app_ns }}" "{{ item.metadata.name }}" test-network-function.com/subscription_name=etcd --overwrite
+    oc annotate csv -n "{{ app_ns }}" "{{ item.metadata.name }}" test-network-function.com/subscription_name='["etcd"]' --overwrite
     oc annotate csv -n "{{ app_ns }}" "{{ item.metadata.name }}" test-network-function.com/operator_tests='["OPERATOR_STATUS"]' --overwrite
   when: item.metadata.name|regex_search(operators_regexp)
   loop: "{{ example_cnf_csv_list.resources }}"
