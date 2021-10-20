@@ -1,0 +1,35 @@
+---
+
+# Remove labels/annotations from pods - WIP
+
+# In this case and the following, labels are included after deploying the pods. However, as stated here:
+# https://github.com/test-network-function/test-network-function#targetpodlabels
+# "It's highly recommended that the labels should be defined in pod definition rather than added after pod is created"
+- name: Remove autodiscovery labels/annotations from pods
+  shell: |
+    set -ex
+    oc label pod -n "{{ app_ns }}" "{{ item.metadata.name }}" "{{ app_ns }}"/"{{ targetpodlabels_name }}"-
+    oc annotate pod -n "{{ app_ns }}" "{{ item.metadata.name }}" test-network-function.com/container_tests-
+  when: item.metadata.name|regex_search(cnfs_regexp)
+  loop: "{{ example_cnf_pod_list.resources }}"
+
+- name: Remove autodiscovery labels/annotations related to exclude connectivity features from pods
+  shell: |
+    set -ex
+    oc label pod -n "{{ app_ns }}" "{{ item.metadata.name }}" test-network-function.com/skip_connectivity_tests-
+  when:  item.metadata.name|regex_search(exclude_connectivity_regexp)
+  loop: "{{ example_cnf_pod_list.resources }}"
+
+# Remove labels/annotations from operators
+
+- name: Remove autodiscovery labels/annotations from CSVs
+  shell: |
+    set -ex
+    
+    oc label csv -n "{{ app_ns }}" "{{ item.metadata.name }}" test-network-function.com/operator-
+    oc annotate csv -n "{{ app_ns }}" "{{ item.metadata.name }}" test-network-function.com/operator_tests-
+    oc annotate csv -n "{{ app_ns }}" "{{ item.metadata.name }}" test-network-function.com/subscription_name-
+  when: item.metadata.name|regex_search(operators_regexp)
+  loop: "{{ example_cnf_csv_list.resources }}"
+
+...

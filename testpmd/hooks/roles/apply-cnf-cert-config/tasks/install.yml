@@ -1,0 +1,56 @@
+---
+
+# Label/Annotate pods - WIP
+
+- name: Get pods from example-cnf namespace
+  k8s_info:
+    api_version: v1
+    kind: pod
+    namespace: "{{ app_ns }}"
+  register: example_cnf_pod_list
+
+# In this case and the following, labels are included after deploying the pods. However, as stated here:
+# https://github.com/test-network-function/test-network-function#targetpodlabels
+# "It's highly recommended that the labels should be defined in pod definition rather than added after pod is created"
+- name: Tag pods with autodiscovery labels/annotations to execute test suites
+  shell: |
+    set -ex
+    oc label pod -n "{{ app_ns }}" "{{ item.metadata.name }}" "{{ app_ns }}"/"{{ targetpodlabels_name }}"="{{ targetpodlabels_value }}" --overwrite
+    oc annotate pod -n "{{ app_ns }}" "{{ item.metadata.name }}" test-network-function.com/container_tests="[\"PRIVILEGED_POD\",\"PRIVILEGED_ROLE\"]" --overwrite
+  when: item.metadata.name|regex_search(cnfs_regexp)
+  loop: "{{ example_cnf_pod_list.resources }}"
+
+- name: Tag pods with autodiscovery labels related to exclude connectivity features in test suites
+  shell: |
+    set -ex
+    oc label pod -n "{{ app_ns }}" "{{ item.metadata.name }}" test-network-function.com/skip_connectivity_tests=true --overwrite
+  when:  item.metadata.name|regex_search(exclude_connectivity_regexp)
+  loop: "{{ example_cnf_pod_list.resources }}"
+
+# Label/Annotate operators
+
+- name: Get CSVs from example-cnf namespace
+  k8s_info:
+    api_version: operators.coreos.com/v1alpha1
+    kind: ClusterServiceVersion
+    namespace: "{{ app_ns }}"
+  register: example_cnf_csv_list
+
+# Subscription names are retrieved from the install plan that corresponds to the CSV.
+- name: Tag CSVs with autodiscovery labels/annotations to execute test suites
+  shell: |
+    set -ex
+    
+    oc label csv -n "{{ app_ns }}" "{{ item.metadata.name }}" test-network-function.com/operator=target --overwrite
+    oc annotate csv -n "{{ app_ns }}" "{{ item.metadata.name }}" test-network-function.com/operator_tests='["OPERATOR_STATUS"]' --overwrite
+    
+    INSTALL_PLAN_NAME=$(oc get installplan -n "{{ app_ns }}" | grep "{{ item.metadata.name }}" | awk '{ print $1 }')
+    SUBSCRIPTION_NAMES=($(oc get installplan $INSTALL_PLAN_NAME -n "{{ app_ns }}" -o json | jq -r ".metadata.ownerReferences[].name"))
+    SUBSCRIPTION_NAMES_JSON=$(echo ${SUBSCRIPTION_NAMES[@]} | jq -R 'split (" ")')
+
+    oc annotate csv -n "{{ app_ns }}" "{{ item.metadata.name }}" test-network-function.com/subscription_name="$SUBSCRIPTION_NAMES_JSON" --overwrite
+
+  when: item.metadata.name|regex_search(operators_regexp)
+  loop: "{{ example_cnf_csv_list.resources }}"
+
+...
