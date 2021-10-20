@@ -48,7 +48,7 @@
     SUBSCRIPTION_NAMES=($(oc get installplan $INSTALL_PLAN_NAME -n "{{ app_ns }}" -o json | jq -r ".metadata.ownerReferences[].name"))
     SUBSCRIPTION_NAMES_JSON=$(echo ${SUBSCRIPTION_NAMES[@]} | jq -R 'split (" ")')
 
-    oc annotate csv -n "{{ app_ns }}" "{{ item.metadata.name }}" test-network-function.com/subscription_name=\"$SUBSCRIPTION_NAMES_JSON\" --overwrite
+    oc annotate csv -n "{{ app_ns }}" "{{ item.metadata.name }}" test-network-function.com/subscription_name="$SUBSCRIPTION_NAMES_JSON" --overwrite
 
   when: item.metadata.name|regex_search(operators_regexp)
   loop: "{{ example_cnf_csv_list.resources }}"
