@@ -1,7 +1,6 @@
 ---
 app_ns: "{{ dci_openshift_app_ns|default('example-cnf') }}"
 operators_regexp: "{{ tnf_operators_regexp|default('cnf-app-mac|testpmd-operator') }}"
-cnfs_regexp: "{{ tnf_cnfs_regexp|default('testpmd-operator|testpmd-app') }}"
 exclude_connectivity_regexp: "{{ tnf_exclude_connectivity_regexp|default('.*') }}"
 targetpodlabels_name: "{{ tnf_targetpodlabels_name|default('tnf') }}"
 targetpodlabels_value: "{{ tnf_targetpodlabels_value|default('target') }}"

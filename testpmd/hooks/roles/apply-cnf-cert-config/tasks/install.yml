@@ -1,6 +1,8 @@
 ---
 
-# Label/Annotate pods - WIP
+# Label pods - only the labels related to exclude connectivity features, as the
+# pods are autodiscovered based on the labels provided in tnf_targetpodlabels variable
+# in the pipeline
 
 - name: Get pods from example-cnf namespace
   k8s_info:
@@ -9,17 +11,10 @@
     namespace: "{{ app_ns }}"
   register: example_cnf_pod_list
 
-# In this case and the following, labels are included after deploying the pods. However, as stated here:
+# Labels are included after deploying the pods. However, as stated here:
 # https://github.com/test-network-function/test-network-function#targetpodlabels
-# "It's highly recommended that the labels should be defined in pod definition rather than added after pod is created"
-- name: Tag pods with autodiscovery labels/annotations to execute test suites
-  shell: |
-    set -ex
-    oc label pod -n "{{ app_ns }}" "{{ item.metadata.name }}" "{{ app_ns }}"/"{{ targetpodlabels_name }}"="{{ targetpodlabels_value }}" --overwrite
-    oc annotate pod -n "{{ app_ns }}" "{{ item.metadata.name }}" test-network-function.com/container_tests="[\"PRIVILEGED_POD\",\"PRIVILEGED_ROLE\"]" --overwrite
-  when: item.metadata.name|regex_search(cnfs_regexp)
-  loop: "{{ example_cnf_pod_list.resources }}"
-
+# "It's highly recommended that the labels should be defined in pod definition rather 
+# than added after pod is created"
 - name: Tag pods with autodiscovery labels related to exclude connectivity features in test suites
   shell: |
     set -ex
