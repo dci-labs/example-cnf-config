@@ -1,0 +1,11 @@
+---
+- block:
+
+    - name: install
+      include_tasks: install.yml
+
+    - name: post-run
+      include_tasks: post-run.yml
+
+  when: do_cnf_cert|default(false)|bool
+...
