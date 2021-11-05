@@ -1,6 +1,6 @@
 ---
 
-# Label pods - only the labels related to exclude connectivity features, as the
+# Label pods - only the labels related to exclude connectivity features are applied, as the
 # pods are autodiscovered based on the labels provided in tnf_targetpodlabels variable
 # in the pipeline
 
