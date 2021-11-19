@@ -39,12 +39,17 @@
     oc label csv -n "{{ app_ns }}" "{{ item.metadata.name }}" test-network-function.com/operator=target --overwrite
     oc annotate csv -n "{{ app_ns }}" "{{ item.metadata.name }}" test-network-function.com/operator_tests='["OPERATOR_STATUS"]' --overwrite
     
-    INSTALL_PLAN_NAME=$(oc get installplan -n "{{ app_ns }}" | grep "{{ item.metadata.name }}" | awk '{ print $1 }')
-    SUBSCRIPTION_NAMES=($(oc get installplan $INSTALL_PLAN_NAME -n "{{ app_ns }}" -o json | jq -r ".metadata.ownerReferences[].name"))
-    SUBSCRIPTION_NAMES_JSON=$(echo ${SUBSCRIPTION_NAMES[@]} | jq -R 'split (" ")')
+    INSTALL_PLAN_NAMES=($(oc get installplan -n "{{ app_ns }}" | grep "{{ item.metadata.name }}" | awk '{ print $1 }'))
+    INSTALL_PLAN_NUMBER=$(echo -n ${INSTALL_PLAN_NAMES[@]} | wc -w)
 
-    oc annotate csv -n "{{ app_ns }}" "{{ item.metadata.name }}" test-network-function.com/subscription_name="$SUBSCRIPTION_NAMES_JSON" --overwrite
-
+    if [ $INSTALL_PLAN_NUMBER -ne 0 ]; then
+      SUBSCRIPTION_NAMES=()
+      for INSTALL_PLAN_NAME in "${INSTALL_PLAN_NAMES[@]}"; do
+        SUBSCRIPTION_NAMES+=( $(oc get installplan "${INSTALL_PLAN_NAME}" -n "{{ app_ns }}" -o json | jq -r ".metadata.ownerReferences[].name") )
+      done
+      SUBSCRIPTION_NAMES_JSON=$(echo ${SUBSCRIPTION_NAMES[@]} | jq -R 'split (" ")| unique')
+      oc annotate csv -n "{{ app_ns }}" "{{ item.metadata.name }}" test-network-function.com/subscription_name="$SUBSCRIPTION_NAMES_JSON" --overwrite
+    fi
   when: item.metadata.name|regex_search(operators_regexp)
   loop: "{{ example_cnf_csv_list.resources }}"
 
