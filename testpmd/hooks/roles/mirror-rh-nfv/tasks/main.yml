@@ -46,16 +46,18 @@
 
 - name: "Wait for a moment to machine configs (if any) to render"
   pause:
-    seconds: 30
+    seconds: 60
 
-- name: "Wait for ALL nodes to be in a Done state"
+- name: Wait for updated machine configs to be applied on the nodes
   k8s_info:
-    api: v1
-    kind: Node
-  register: cluster_nodes
+    api_version: machineconfiguration.openshift.io/v1
+    kind: MachineConfigPool
+  register: reg_mcpool_status
+  vars:
+    status_query: "resources[*].status.conditions[?type=='Updated'].status"
+    update_status: "{{ reg_mcpool_status | json_query(status_query) | flatten | unique }}"
   until:
-    - '"Working" not in ((cluster_nodes.resources == None) | ternary([], cluster_nodes.resources)) | json_query("[].metadata.annotations.\"machineconfiguration.openshift.io/state\"")'
-  retries: 240
-  delay: 10
-  failed_when:
-    - '"Degraded" in ((cluster_nodes.resources == None) | ternary([], cluster_nodes.resources)) | json_query("[].metadata.annotations.\"machineconfiguration.openshift.io/state\"")'
+    - update_status == ['True']
+  retries: 60
+  delay: 60
+...
