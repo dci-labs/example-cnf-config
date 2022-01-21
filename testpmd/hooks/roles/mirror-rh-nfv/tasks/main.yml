@@ -60,4 +60,17 @@
     - update_status == ['True']
   retries: 60
   delay: 60
+  ignore_errors: true
+
+- name: Retrieve more logs in the case of failure
+  shell: |
+    {{ oc_tool_path }} get mcp
+    {{ oc_tool_path }} get mc
+    {{ oc_tool_path }} describe mcp worker
+  when: reg_mcpool_status.failed
+
+- name: Fail when could not apply machine config on the nodes
+  fail:
+    msg: "Failed to apply machine config on the nodes"
+  when: reg_mcpool_status.failed
 ...
