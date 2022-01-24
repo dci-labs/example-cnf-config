@@ -65,9 +65,19 @@
 - name: Retrieve more logs in the case of failure
   shell: |
     {{ oc_tool_path }} get mcp
+    echo "=========="
     {{ oc_tool_path }} get mc
+    echo "=========="
     {{ oc_tool_path }} describe mcp worker
+    echo "=========="
+    for i in {0..3}; do echo "worker-$i" && oc describe node worker-$i | grep Config; done
+  register: mcp_logs
   when: reg_mcpool_status.failed
+
+- name: Upload logs into DCI
+  copy:
+    dest: "{{ job_logs.path }}/cnf-example_mcp_failure_logs.log"
+    content: "{{ mcp_logs.stdout }}"
 
 - name: Fail when could not apply machine config on the nodes
   fail:
