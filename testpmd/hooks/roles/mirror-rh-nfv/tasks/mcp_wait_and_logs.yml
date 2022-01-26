@@ -1,0 +1,54 @@
+---
+- name: "Wait for a moment to machine configs (if any) to render"
+  pause:
+    seconds: 60
+
+- name: Wait for updated machine configs to be applied on the nodes
+  k8s_info:
+    api_version: machineconfiguration.openshift.io/v1
+    kind: MachineConfigPool
+  register: reg_mcpool_status
+  vars:
+    status_query: "resources[*].status.conditions[?type=='Updated'].status"
+    update_status: "{{ reg_mcpool_status | json_query(status_query) | flatten | unique }}"
+  until:
+    - update_status == ['True']
+  retries: 60
+  delay: 60
+  ignore_errors: true
+
+- name: Retrieve more logs in the case of failure
+  block:
+    - name: Retrieve mcp logs
+      shell: |
+        echo "oc get mcp =========="
+        {{ oc_tool_path }} get mcp
+        echo "oc get mc =========="
+        {{ oc_tool_path }} get mc
+        echo "oc describe mcp worker =========="
+        {{ oc_tool_path }} describe mcp worker
+      register: mcp_logs
+
+    - name: Retrieve list of worker nodes
+      shell: >
+        {{ oc_tool_path }} get nodes --selector=node-role.kubernetes.io/worker -o custom-columns=NAME:.metadata.name --no-headers
+      register: worker_nodes
+
+    - name: Retrieve worker logs
+      shell: |
+        echo "oc describe node {{ item }} =========="
+        {{ oc_tool_path }} describe node {{ item }}
+      loop: "{{ worker_nodes }}"
+      register: mcp_worker_logs
+
+    - name: Upload logs into DCI
+      copy:
+        dest: "{{ job_logs.path }}/cnf-example_mcp_failure_logs.log"
+        content: "{{ mcp_logs.stdout }} {{ mcp_worker_logs.stdout }}"
+
+    - name: Fail when could not apply machine config on the nodes
+      fail:
+        msg: "Failed to apply machine config on the nodes"
+  when: reg_mcpool_status.failed
+
+  ...
