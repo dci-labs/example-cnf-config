@@ -35,7 +35,7 @@
       - name: intel-numa0-net1
         count: 2
     packet_generator_networks:
-      - name: intel-numa0-net2
+      - name: intel-numa0-net1
         count: 2
     run_migration_test: false
     mac_workaround_enable: false
@@ -69,7 +69,7 @@
 #    rootdevices:
 #      - "0000:d8:00.0"
 #    nodeselector: '"node.openshift.io/nic_type": "intel810"'
-- name: "Create SriovNetworkNodePolicy for {{ sriov['policy'] }}"
+- name: "Create SriovNetworkNodePolicy"
   k8s:
     definition: "{{ lookup('template', 'templates/sriov-policy.yml.j2') }}"
   loop: "{{ sriov_network }}"
@@ -77,7 +77,7 @@
     loop_var: sriov
   when: sriov_network is defined
 
-- name: "Create SriovNetwork for {{ sriov['name'] }}"
+- name: "Create SriovNetwork for"
   k8s:
     definition: "{{ lookup('template', 'templates/sriov-network.yml.j2') }}"
   loop: "{{ sriov_network }}"
