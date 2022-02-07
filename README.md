@@ -30,7 +30,6 @@ Create a pipeline file. For example:
       dci_config_dir: /path/to/git/clone/example-cnf-config/testpmd
       operator_version: v0.0.1
       app_version: v0.1.2
-      registry_url: "jumphost.{{ cluster_name }}.dfwt5g.lab:5000"
       repo_name: nfv-example-cnf
       ocp_version: 4.5
       enable_trex: true
