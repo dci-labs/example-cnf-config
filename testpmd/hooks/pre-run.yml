@@ -77,7 +77,7 @@
     loop_var: sriov
   when: sriov_network is defined
 
-- name: "Create SriovNetwork for"
+- name: "Create SriovNetworks"
   k8s:
     definition: "{{ lookup('template', 'templates/sriov-network.yml.j2') }}"
   loop: "{{ sriov_network }}"

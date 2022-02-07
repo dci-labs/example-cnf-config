@@ -1,7 +1,21 @@
+---
 apiVersion: sriovnetwork.openshift.io/v1
 kind: SriovNetwork
 metadata:
-  name: "{{ sriov['name'] }}"
+  name: "intel-numa0-net1"
+  namespace: openshift-sriov-network-operator
+spec:
+  networkNamespace: "{{ cnf_namespace }}"
+  vlan: {{ sriov['vlan']|int }}
+  resourceName: "{{ sriov['resource'] }}"
+  spoofChk: "on"
+  trust: "on"
+  ipam: '{ }'
+---
+apiVersion: sriovnetwork.openshift.io/v1
+kind: SriovNetwork
+metadata:
+  name: "intel-numa0-net2"
   namespace: openshift-sriov-network-operator
 spec:
   networkNamespace: "{{ cnf_namespace }}"
