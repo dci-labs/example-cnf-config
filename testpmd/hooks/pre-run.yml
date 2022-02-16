@@ -85,6 +85,11 @@
     loop_var: sriov
   when: sriov_network is defined
 
+- name: SR-IOV must-gather
+  shell: >
+    bash files/collect-sriov-operator-data.sh | tee {{ job_logs.path }}/collect-sriov-operator-data.txt
+  ignore_errors: true
+
 - name: Set mac workround for ocp older than 4.6
   set_fact:
     mac_workaround_enable: true
