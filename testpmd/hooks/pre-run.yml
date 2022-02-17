@@ -85,6 +85,15 @@
     loop_var: sriov
   when: sriov_network is defined
 
+# TODO: add until confition and rescue in the case of fail
+- name: Wait to have all networks allocatable on worker nodes
+  shell: >
+    oc get nodes --selector='!node-role.kubernetes.io/master'
+    -o jsonpath='{.items[*].status.allocatable.openshift\.io\/{{ item.resource }}}'
+  loop: "{{ sriov_network }}"
+  register: sriov_networks_allocation
+  ignore_errors: true
+
 - name: SR-IOV must-gather
   shell: >
     bash files/collect-sriov-operator-data.sh | tee {{ job_logs.path }}/collect-sriov-operator-data.txt
