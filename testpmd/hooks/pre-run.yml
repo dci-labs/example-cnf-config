@@ -96,7 +96,7 @@
 
 - name: SR-IOV must-gather
   shell: >
-    bash files/collect-sriov-operator-data.sh | tee {{ job_logs.path }}/collect-sriov-operator-data.txt
+    bash {{ hookdir }}/hooks/files/collect-sriov-operator-data.sh | tee {{ job_logs.path }}/collect-sriov-operator-data.txt
   ignore_errors: true
 
 - name: Set mac workround for ocp older than 4.6
