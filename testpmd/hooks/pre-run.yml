@@ -96,15 +96,15 @@
     oc get nodes --selector='!node-role.kubernetes.io/master' -o jsonpath='{.items[*].status.allocatable}'
   register: nodes_allocation
   until:
-    - nodes_allocation.stdout | regex_findall(sriov_networks[0].resource) | length == count_workers.stdout | int
-    - nodes_allocation.stdout | regex_findall(sriov_networks[1].resource) | length == count_workers.stdout | int
+    - nodes_allocation.stdout | regex_findall(sriov_network[0].resource) | length == count_workers.stdout | int
+    - nodes_allocation.stdout | regex_findall(sriov_network[1].resource) | length == count_workers.stdout | int
   retries: 5
   delay: 30
   ignore_errors: true
 
 - name: SR-IOV must-gather
   shell: >
-    bash templates/collect-sriov-operator-data.sh | tee {{ job_logs.path }}/collect-sriov-operator-data.txt
+    bash {{ dci_config_dir }}/hooks/files/collect-sriov-operator-data.sh | tee {{ job_logs.path }}/collect-sriov-operator-data.txt
   ignore_errors: true
 
 - name: Set mac workround for ocp older than 4.6
