@@ -69,7 +69,7 @@
 #    rootdevices:
 #      - "0000:d8:00.0"
 #    nodeselector: '"node.openshift.io/nic_type": "intel810"'
-- name: "Create SriovNetworkNodePolicy for {{ sriov['policy'] }}"
+- name: Create SriovNetworkNodePolicy
   k8s:
     definition: "{{ lookup('template', 'templates/sriov-policy.yml.j2') }}"
   loop: "{{ sriov_network }}"
@@ -77,7 +77,7 @@
     loop_var: sriov
   when: sriov_network is defined
 
-- name: "Create SriovNetwork for {{ sriov['name'] }}"
+- name: Create SriovNetwork
   k8s:
     definition: "{{ lookup('template', 'templates/sriov-network.yml.j2') }}"
   loop: "{{ sriov_network }}"
@@ -85,22 +85,21 @@
     loop_var: sriov
   when: sriov_network is defined
 
-- name: Get number of workers
-  shell: >
-    oc get nodes --no-headers=true --selector='!node-role.kubernetes.io/master' | wc -l
-  register: count_workers
+- name: Ensure that SR-IOV networks are allocatable on the nodes
+  block:
+    - name: Wait to have all networks allocatable on worker nodes
+      include_role:
+        name: "{{ dci_config_dir }}/hooks/roles/sriov-networks"
+  rescue:
+    - name: Delete all pods sriov-network-config-daemon-XXXXX
+      shell: >
+        oc get pods -n {{ cnf_namespace }} --no-headers=true |
+        awk '/sriov-network-config-daemon/{print $1}' |
+        xargs oc delete -n {{ cnf_namespace }} pod
 
-# TODO: add rescue in the case of fail
-- name: Wait to have all networks allocatable on worker nodes
-  shell: >
-    oc get nodes --selector='!node-role.kubernetes.io/master' -o jsonpath='{.items[*].status.allocatable}'
-  register: nodes_allocation
-  until:
-    - nodes_allocation.stdout | regex_findall(sriov_network[0].resource) | length == count_workers.stdout | int
-    - nodes_allocation.stdout | regex_findall(sriov_network[1].resource) | length == count_workers.stdout | int
-  retries: 10
-  delay: 30
-  ignore_errors: true
+    - name: Wait again to have all networks allocatable on worker nodes
+      include_role:
+        name: "{{ dci_config_dir }}/hooks/roles/sriov-networks"
 
 - name: SR-IOV must-gather
   shell: >
