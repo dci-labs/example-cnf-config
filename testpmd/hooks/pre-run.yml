@@ -3,11 +3,6 @@
   set_fact:
     cnf_namespace: "example-cnf"
 
-- name: Get oc version output
-  shell: |
-    {{ oc_tool_path }} --kubeconfig {{ kubeconfig_path }} version
-  register: oc_version_str
-
 - name: Get example-cnf component details from job.components
   set_fact:
     operator_version: "{{ item['name'] }}"
