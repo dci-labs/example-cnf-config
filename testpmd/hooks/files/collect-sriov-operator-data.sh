@@ -4,56 +4,56 @@ NAMESPACE=openshift-sriov-network-operator
 
 echo "=== Overview ===" 
 
-oc get pods -n $NAMESPACE
-oc get deployments -n $NAMESPACE
-oc get replicasets -n $NAMESPACE
-oc get daemonsets -n $NAMESPACE
+{{ app_agent_dir.path }}/oc get pods -n $NAMESPACE
+{{ app_agent_dir.path }}/oc get deployments -n $NAMESPACE
+{{ app_agent_dir.path }}/oc get replicasets -n $NAMESPACE
+{{ app_agent_dir.path }}/oc get daemonsets -n $NAMESPACE
 
-oc get csv -n $NAMESPACE
-oc get operatorgroup -n $NAMESPACE
+{{ app_agent_dir.path }}/oc get csv -n $NAMESPACE
+{{ app_agent_dir.path }}/oc get operatorgroup -n $NAMESPACE
 
-oc get SriovOperatorConfig -n $NAMESPACE
-oc get SriovNetwork -n $NAMESPACE
-oc get SriovNetworkNodeState -n $NAMESPACE
-oc get SriovNetworkNodePolicy -n $NAMESPACE
+{{ app_agent_dir.path }}/oc get SriovOperatorConfig -n $NAMESPACE
+{{ app_agent_dir.path }}/oc get SriovNetwork -n $NAMESPACE
+{{ app_agent_dir.path }}/oc get SriovNetworkNodeState -n $NAMESPACE
+{{ app_agent_dir.path }}/oc get SriovNetworkNodePolicy -n $NAMESPACE
 
 echo "=== -o yaml ==="
 
-oc get -o yaml pods -n $NAMESPACE
-oc get -o yaml deployments -n $NAMESPACE
-oc get -o yaml replicasets -n $NAMESPACE
-oc get -o yaml daemonsets -n $NAMESPACE
+{{ app_agent_dir.path }}/oc get -o yaml pods -n $NAMESPACE
+{{ app_agent_dir.path }}/oc get -o yaml deployments -n $NAMESPACE
+{{ app_agent_dir.path }}/oc get -o yaml replicasets -n $NAMESPACE
+{{ app_agent_dir.path }}/oc get -o yaml daemonsets -n $NAMESPACE
 
-oc get -o yaml csv -n $NAMESPACE
-oc get -o yaml operatorgroup -n $NAMESPACE
+{{ app_agent_dir.path }}/oc get -o yaml csv -n $NAMESPACE
+{{ app_agent_dir.path }}/oc get -o yaml operatorgroup -n $NAMESPACE
 
-oc get -o yaml SriovOperatorConfig -n $NAMESPACE
-oc get -o yaml SriovNetwork -n $NAMESPACE
-oc get -o yaml SriovNetworkNodeState -n $NAMESPACE
-oc get -o yaml SriovNetworkNodePolicy -n $NAMESPACE
+{{ app_agent_dir.path }}/oc get -o yaml SriovOperatorConfig -n $NAMESPACE
+{{ app_agent_dir.path }}/oc get -o yaml SriovNetwork -n $NAMESPACE
+{{ app_agent_dir.path }}/oc get -o yaml SriovNetworkNodeState -n $NAMESPACE
+{{ app_agent_dir.path }}/oc get -o yaml SriovNetworkNodePolicy -n $NAMESPACE
 
 echo "=== describe ==="
 
-oc describe pods -n $NAMESPACE
-oc describe deployments -n $NAMESPACE
-oc describe replicasets -n $NAMESPACE
-oc describe daemonsets -n $NAMESPACE
+{{ app_agent_dir.path }}/oc describe pods -n $NAMESPACE
+{{ app_agent_dir.path }}/oc describe deployments -n $NAMESPACE
+{{ app_agent_dir.path }}/oc describe replicasets -n $NAMESPACE
+{{ app_agent_dir.path }}/oc describe daemonsets -n $NAMESPACE
 
-oc describe csv -n $NAMESPACE
-oc describe operatorgroup -n $NAMESPACE
+{{ app_agent_dir.path }}/oc describe csv -n $NAMESPACE
+{{ app_agent_dir.path }}/oc describe operatorgroup -n $NAMESPACE
 
-oc describe SriovOperatorConfig -n $NAMESPACE
-oc describe SriovNetwork -n $NAMESPACE
-oc describe SriovNetworkNodeState -n $NAMESPACE
-oc describe SriovNetworkNodePolicy -n $NAMESPACE
+{{ app_agent_dir.path }}/oc describe SriovOperatorConfig -n $NAMESPACE
+{{ app_agent_dir.path }}/oc describe SriovNetwork -n $NAMESPACE
+{{ app_agent_dir.path }}/oc describe SriovNetworkNodeState -n $NAMESPACE
+{{ app_agent_dir.path }}/oc describe SriovNetworkNodePolicy -n $NAMESPACE
 
 echo "=== Collecting node info ==="
-oc get nodes -o yaml
+{{ app_agent_dir.path }}/oc get nodes -o yaml
 
 echo "=== Collecting logs ==="
-for pod in $(oc get pods -n $NAMESPACE -o name); do 
+for pod in $({{ app_agent_dir.path }}/oc get pods -n $NAMESPACE -o name); do 
   echo "+++ logs for pod $pod +++"
-  oc logs -n $NAMESPACE $pod
+  {{ app_agent_dir.path }}/oc logs -n $NAMESPACE $pod
 done
 
 EOF

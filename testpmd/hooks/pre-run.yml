@@ -84,9 +84,9 @@
 
     - name: Delete all pods sriov-network-config-daemon-XXXXX
       shell: >
-        oc get pods -n openshift-sriov-network-operator --no-headers=true |
+        {{ oc_tool_path }} get pods -n openshift-sriov-network-operator --no-headers=true |
         awk '/sriov-network-config-daemon/{print $1}' |
-        xargs oc delete -n openshift-sriov-network-operator pod
+        xargs {{ oc_tool_path }} delete -n openshift-sriov-network-operator pod
 
     - name: Wait again to have all networks allocatable on worker nodes
       include_role:
