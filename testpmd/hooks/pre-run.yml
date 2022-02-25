@@ -84,20 +84,16 @@
 
     - name: Delete all pods sriov-network-config-daemon-XXXXX
       shell: >
-        {{ oc_tool_path }} get pods -n {{ cnf_namespace }} --no-headers=true |
+        {{ oc_tool_path }} get pods -n openshift-sriov-network-operator --no-headers=true |
         awk '/sriov-network-config-daemon/{print $1}' |
-        xargs {{ oc_tool_path }} delete -n {{ cnf_namespace }} pod
+        xargs {{ oc_tool_path }} delete -n openshift-sriov-network-operator pod
 
     - name: Wait again to have all networks allocatable on worker nodes
       include_role:
         name: "{{ dci_config_dir }}/hooks/roles/sriov-networks"
 
 - name: SR-IOV must-gather
-<<<<<<< HEAD
-  script: ./{{ dci_config_dir }}/hooks/files/collect-sriov-operator-data.sh {{  }} | tee {{ job_logs.path }}/collect-sriov-operator-data.txt
-=======
-  script: ./{{ dci_config_dir }}/hooks/files/collect-sriov-operator-data.sh {{ oc_tool_path }} | tee {{ job_logs.path }}/collect-sriov-operator-data.txt
->>>>>>> f7b11f1 (Using the proper oc path)
+  script: "{{ dci_config_dir }}/hooks/files/collect-sriov-operator-data.sh {{ oc_tool_path }} | tee {{ job_logs.path }}/collect-sriov-operator-data.txt"
   ignore_errors: true
 
 - name: Checkout Example CNF deployment role
