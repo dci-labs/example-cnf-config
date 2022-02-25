@@ -85,6 +85,10 @@
     loop_var: sriov
   when: sriov_network is defined
 
+# SR-IOV operator reports networks to be well-created,
+# but then it takes several minutes
+# to see them allocatable on the worker nodes.
+# We probably have to open a BZ.
 - name: Ensure that SR-IOV networks are allocatable on the nodes
   block:
     - name: Wait to have all networks allocatable on worker nodes
@@ -93,9 +97,9 @@
   rescue:
     - name: Delete all pods sriov-network-config-daemon-XXXXX
       shell: >
-        oc get pods -n {{ cnf_namespace }} --no-headers=true |
+        oc get pods -n openshift-sriov-network-operator --no-headers=true |
         awk '/sriov-network-config-daemon/{print $1}' |
-        xargs oc delete -n {{ cnf_namespace }} pod
+        xargs oc delete -n openshift-sriov-network-operator pod
 
     - name: Wait again to have all networks allocatable on worker nodes
       include_role:
