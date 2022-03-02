@@ -95,6 +95,11 @@
       include_role:
         name: "{{ dci_config_dir }}/hooks/roles/sriov-networks"
   rescue:
+    - name: SR-IOV must-gather in the case of failure
+      shell: >
+        bash {{ dci_config_dir }}/hooks/files/collect-sriov-operator-data.sh | tee {{ job_logs.path }}/collect-sriov-operator-data-rescue.txt
+      ignore_errors: true
+
     - name: Delete all pods sriov-network-config-daemon-XXXXX
       shell: >
         oc get pods -n openshift-sriov-network-operator --no-headers=true |
@@ -107,7 +112,7 @@
 
 - name: SR-IOV must-gather
   shell: >
-    bash {{ dci_config_dir }}/hooks/files/collect-sriov-operator-data.sh | tee {{ job_logs.path }}/collect-sriov-operator-data.txt
+    bash {{ dci_config_dir }}/hooks/files/collect-sriov-operator-data.sh | tee {{ job_logs.path }}/collect-sriov-operator-data-ok.txt
   ignore_errors: true
 
 - name: Set mac workround for ocp older than 4.6

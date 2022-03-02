@@ -11,6 +11,6 @@
   until:
     - nodes_allocation.stdout | regex_findall(sriov_network[0].resource) | length == count_workers.stdout | int
     - nodes_allocation.stdout | regex_findall(sriov_network[1].resource) | length == count_workers.stdout | int
-  retries: 20
+  retries: 30
   delay: 30
 ...
