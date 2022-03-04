@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set +x
+
 echo "Tool path: ${1}" 
 
 # Setting OC binary
