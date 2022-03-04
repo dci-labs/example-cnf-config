@@ -1,5 +1,7 @@
 #!/bin/bash
 
+echo "Tool path: ${1}" 
+
 # Setting OC binary
 if [ -n "${1}" ]; then
  oc_tool_path=${1};
