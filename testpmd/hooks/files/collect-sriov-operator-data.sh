@@ -1,59 +1,76 @@
-#!/bin/bash 
+#!/bin/bash
+
+set +x
+
+echo "Tool path: ${1}" 
+
+# Setting OC binary
+if [ -n "${1}" ]; then
+ oc_tool_path=${1};
+else
+  if ! type -P oc &> /dev/null
+  then
+      echo "oc could not be found"
+      exit
+  else
+      oc_tool_path=$(type -P oc)
+  fi
+fi
 
 NAMESPACE=openshift-sriov-network-operator
 
 echo "=== Overview ===" 
 
-oc get pods -n $NAMESPACE
-oc get deployments -n $NAMESPACE
-oc get replicasets -n $NAMESPACE
-oc get daemonsets -n $NAMESPACE
+${oc_tool_path} get pods -n $NAMESPACE
+${oc_tool_path} get deployments -n $NAMESPACE
+${oc_tool_path} get replicasets -n $NAMESPACE
+${oc_tool_path} get daemonsets -n $NAMESPACE
 
-oc get csv -n $NAMESPACE
-oc get operatorgroup -n $NAMESPACE
+${oc_tool_path} get csv -n $NAMESPACE
+${oc_tool_path} get operatorgroup -n $NAMESPACE
 
-oc get SriovOperatorConfig -n $NAMESPACE
-oc get SriovNetwork -n $NAMESPACE
-oc get SriovNetworkNodeState -n $NAMESPACE
-oc get SriovNetworkNodePolicy -n $NAMESPACE
+${oc_tool_path} get SriovOperatorConfig -n $NAMESPACE
+${oc_tool_path} get SriovNetwork -n $NAMESPACE
+${oc_tool_path} get SriovNetworkNodeState -n $NAMESPACE
+${oc_tool_path} get SriovNetworkNodePolicy -n $NAMESPACE
 
 echo "=== -o yaml ==="
 
-oc get -o yaml pods -n $NAMESPACE
-oc get -o yaml deployments -n $NAMESPACE
-oc get -o yaml replicasets -n $NAMESPACE
-oc get -o yaml daemonsets -n $NAMESPACE
+${oc_tool_path} get -o yaml pods -n $NAMESPACE
+${oc_tool_path} get -o yaml deployments -n $NAMESPACE
+${oc_tool_path} get -o yaml replicasets -n $NAMESPACE
+${oc_tool_path} get -o yaml daemonsets -n $NAMESPACE
 
-oc get -o yaml csv -n $NAMESPACE
-oc get -o yaml operatorgroup -n $NAMESPACE
+${oc_tool_path} get -o yaml csv -n $NAMESPACE
+${oc_tool_path} get -o yaml operatorgroup -n $NAMESPACE
 
-oc get -o yaml SriovOperatorConfig -n $NAMESPACE
-oc get -o yaml SriovNetwork -n $NAMESPACE
-oc get -o yaml SriovNetworkNodeState -n $NAMESPACE
-oc get -o yaml SriovNetworkNodePolicy -n $NAMESPACE
+${oc_tool_path} get -o yaml SriovOperatorConfig -n $NAMESPACE
+${oc_tool_path} get -o yaml SriovNetwork -n $NAMESPACE
+${oc_tool_path} get -o yaml SriovNetworkNodeState -n $NAMESPACE
+${oc_tool_path} get -o yaml SriovNetworkNodePolicy -n $NAMESPACE
 
 echo "=== describe ==="
 
-oc describe pods -n $NAMESPACE
-oc describe deployments -n $NAMESPACE
-oc describe replicasets -n $NAMESPACE
-oc describe daemonsets -n $NAMESPACE
+${oc_tool_path} describe pods -n $NAMESPACE
+${oc_tool_path} describe deployments -n $NAMESPACE
+${oc_tool_path} describe replicasets -n $NAMESPACE
+${oc_tool_path} describe daemonsets -n $NAMESPACE
 
-oc describe csv -n $NAMESPACE
-oc describe operatorgroup -n $NAMESPACE
+${oc_tool_path} describe csv -n $NAMESPACE
+${oc_tool_path} describe operatorgroup -n $NAMESPACE
 
-oc describe SriovOperatorConfig -n $NAMESPACE
-oc describe SriovNetwork -n $NAMESPACE
-oc describe SriovNetworkNodeState -n $NAMESPACE
-oc describe SriovNetworkNodePolicy -n $NAMESPACE
+${oc_tool_path} describe SriovOperatorConfig -n $NAMESPACE
+${oc_tool_path} describe SriovNetwork -n $NAMESPACE
+${oc_tool_path} describe SriovNetworkNodeState -n $NAMESPACE
+${oc_tool_path} describe SriovNetworkNodePolicy -n $NAMESPACE
 
 echo "=== Collecting node info ==="
-oc get nodes -o yaml
+${oc_tool_path} get nodes -o yaml
 
 echo "=== Collecting logs ==="
-for pod in $(oc get pods -n $NAMESPACE -o name); do 
+for pod in $(${oc_tool_path} get pods -n $NAMESPACE -o name); do
   echo "+++ logs for pod $pod +++"
-  oc logs -n $NAMESPACE $pod
+  ${oc_tool_path} logs -n $NAMESPACE $pod
 done
 
 EOF

@@ -23,7 +23,7 @@
 - name: "Mirror images from index"
   shell:
     cmd: >
-      oc adm catalog mirror
+      {{ oc_tool_path }} adm catalog mirror
       -a {{ mrn_pull_secret }}
       --to-manifests={{ mrn_manifest_dir.path }}
       {{ mrn_mirror_index_image }}

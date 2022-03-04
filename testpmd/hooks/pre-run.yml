@@ -3,24 +3,6 @@
   set_fact:
     cnf_namespace: "example-cnf"
 
-- name: Get oc version output
-  shell: |
-    {{ oc_tool_path }} --kubeconfig {{ kubeconfig_path }} version
-  register: oc_version_str
-
-- name: Get OCP version
-  set_fact:
-    ocp_version: "{{ '.'.join(item.split(':')[1].strip().split('.')[0:2]) }}"
-    ocp_version_maj: "{{ item.split(':')[1].strip().split('.')[0] }}"
-    ocp_version_min: "{{ item.split(':')[1].strip().split('.')[1] }}"
-  when: "'Server Version' in item"
-  loop: "{{ oc_version_str.stdout_lines }}"
-
-- name: Fail if the ocp version is not set
-  fail:
-    msg: "OCP version is not set"
-  when: not ocp_version
-
 - name: Get example-cnf component details from job.components
   set_fact:
     operator_version: "{{ item['name'] }}"
@@ -102,25 +84,17 @@
 
     - name: Delete all pods sriov-network-config-daemon-XXXXX
       shell: >
-        oc get pods -n openshift-sriov-network-operator --no-headers=true |
+        {{ oc_tool_path }} get pods -n openshift-sriov-network-operator --no-headers=true |
         awk '/sriov-network-config-daemon/{print $1}' |
-        xargs oc delete -n openshift-sriov-network-operator pod
+        xargs {{ oc_tool_path }} delete -n openshift-sriov-network-operator pod
 
     - name: Wait again to have all networks allocatable on worker nodes
       include_role:
         name: "{{ dci_config_dir }}/hooks/roles/sriov-networks"
 
 - name: SR-IOV must-gather
-  shell: >
-    bash {{ dci_config_dir }}/hooks/files/collect-sriov-operator-data.sh | tee {{ job_logs.path }}/collect-sriov-operator-data-ok.txt
+  script: "{{ dci_config_dir }}/hooks/files/collect-sriov-operator-data.sh {{ oc_tool_path }} | tee {{ job_logs.path }}/collect-sriov-operator-data.txt"
   ignore_errors: true
-
-- name: Set mac workround for ocp older than 4.6
-  set_fact:
-    mac_workaround_enable: true
-  when:
-    - ocp_version_maj|int == 4
-    - ocp_version_min|int < 6
 
 - name: Checkout Example CNF deployment role
   git:

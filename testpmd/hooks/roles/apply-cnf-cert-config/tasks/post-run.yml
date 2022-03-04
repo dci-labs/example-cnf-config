@@ -16,7 +16,7 @@
 - name: Remove autodiscovery labels related to exclude connectivity features from the corresponding pods
   shell: |
     set -ex
-    oc label pod -n "{{ app_ns }}" "{{ item.metadata.name }}" test-network-function.com/skip_connectivity_tests-
+    {{ oc_tool_path }} label pod -n "{{ app_ns }}" "{{ item.metadata.name }}" test-network-function.com/skip_connectivity_tests-
   when: example_cnf_labelled_pod_list.resources|length > 0
   loop: "{{ example_cnf_labelled_pod_list.resources }}"
 
@@ -26,9 +26,9 @@
   shell: |
     set -ex
     
-    oc label csv -n "{{ app_ns }}" "{{ item.metadata.name }}" test-network-function.com/operator-
-    oc annotate csv -n "{{ app_ns }}" "{{ item.metadata.name }}" test-network-function.com/operator_tests-
-    oc annotate csv -n "{{ app_ns }}" "{{ item.metadata.name }}" test-network-function.com/subscription_name-
+    {{ oc_tool_path }} label csv -n "{{ app_ns }}" "{{ item.metadata.name }}" test-network-function.com/operator-
+    {{ oc_tool_path }} annotate csv -n "{{ app_ns }}" "{{ item.metadata.name }}" test-network-function.com/operator_tests-
+    {{ oc_tool_path }} annotate csv -n "{{ app_ns }}" "{{ item.metadata.name }}" test-network-function.com/subscription_name-
   when: item.metadata.name|regex_search(operators_regexp)
   loop: "{{ example_cnf_csv_list.resources }}"
 
