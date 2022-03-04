@@ -4,12 +4,12 @@
 if [ -n "${1}" ]; then
  oc_tool_path=${1};
 else
-  if ! command -v oc &> /dev/null
+  if ! type -P oc &> /dev/null
   then
       echo "oc could not be found"
       exit
   else
-      oc_tool_path=$(command -v oc)
+      oc_tool_path=$(type -P oc)
   fi
 fi
 
