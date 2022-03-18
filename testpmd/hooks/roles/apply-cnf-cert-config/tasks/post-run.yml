@@ -20,7 +20,18 @@
   when: example_cnf_labelled_pod_list.resources|length > 0
   loop: "{{ example_cnf_labelled_pod_list.resources }}"
 
-# Remove labels/annotations from operators
+# Remove labels/annotations from operators. As there may have been changes in the operators
+# during the execution, we cannot rely on example_cnf_csv_list, so we only check the operators
+# that are currently labelled
+
+- name: Get CSVs from example-cnf namespace that have autodiscovery label defined
+  k8s_info:
+    api_version: v1
+    kind: clusterserviceversion
+    namespace: "{{ app_ns }}"
+    label_selectors:
+      - test-network-function.com/operator = target
+  register: example_cnf_labelled_csv_list
 
 - name: Remove autodiscovery labels/annotations from CSVs
   shell: |
@@ -29,7 +40,7 @@
     {{ oc_tool_path }} label csv -n "{{ app_ns }}" "{{ item.metadata.name }}" test-network-function.com/operator-
     {{ oc_tool_path }} annotate csv -n "{{ app_ns }}" "{{ item.metadata.name }}" test-network-function.com/operator_tests-
     {{ oc_tool_path }} annotate csv -n "{{ app_ns }}" "{{ item.metadata.name }}" test-network-function.com/subscription_name-
-  when: item.metadata.name|regex_search(operators_regexp)
-  loop: "{{ example_cnf_csv_list.resources }}"
+  when: example_cnf_labelled_csv_list.resources|length > 0
+  loop: "{{ example_cnf_labelled_csv_list.resources }}"
 
 ...
