@@ -118,11 +118,13 @@
   become: true
 
 - name: Mirror rh-nfv images when disconnected
+  vars:
+    mrn_pull_secret: partner_creds
   include_role:
     name: "{{ dci_config_dir }}/hooks/roles/mirror-rh-nfv"
   when:
-    - dci_disconnected is defined
-    - dci_disconnected|bool
+    - dci_disconnected | default(false) | bool
+    - partner_creds | length
 
 - name: Deploy NFV Example CNF catalog
   include_role:
