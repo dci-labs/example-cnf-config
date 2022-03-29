@@ -21,7 +21,7 @@ NAMESPACE=openshift-sriov-network-operator
 
 echo "=== Overview ===" 
 
-${oc_tool_path} get pods -n $NAMESPACE
+${oc_tool_path} get pods -n $NAMESPACE -o wide
 ${oc_tool_path} get deployments -n $NAMESPACE
 ${oc_tool_path} get replicasets -n $NAMESPACE
 ${oc_tool_path} get daemonsets -n $NAMESPACE
