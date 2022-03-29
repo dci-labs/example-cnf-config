@@ -102,6 +102,7 @@
 - name: SR-IOV must-gather
   script: "{{ dci_config_dir }}/hooks/files/collect-sriov-operator-data.sh {{ oc_tool_path }} | tee {{ job_logs.path }}/collect-sriov-operator-data.txt"
   ignore_errors: true
+  no_log: true
 
 - name: Checkout Example CNF deployment role
   git:
