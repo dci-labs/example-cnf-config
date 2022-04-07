@@ -4,13 +4,14 @@
     {{ oc_tool_path }} get nodes --no-headers=true --selector='!node-role.kubernetes.io/master' | wc -l
   register: count_workers
 
-- name: Wait to have all networks allocatable on worker nodes
+# This is done intentionally, to keep a bare minimum needed to run the tests
+- name: Wait to have all networks allocatable on at least half of the worker nodes
   shell: >
     {{ oc_tool_path }} get nodes --selector='!node-role.kubernetes.io/master' -o jsonpath='{.items[*].status.allocatable}'
   register: nodes_allocation
   until:
-    - nodes_allocation.stdout | regex_findall(sriov_network[0].resource) | length == count_workers.stdout | int
-    - nodes_allocation.stdout | regex_findall(sriov_network[1].resource) | length == count_workers.stdout | int
+    - nodes_allocation.stdout | regex_findall(sriov_network[0].resource) | length >= count_workers.stdout | int // 2
+    - nodes_allocation.stdout | regex_findall(sriov_network[1].resource) | length >= count_workers.stdout | int // 2
   retries: 30
   delay: 30
 ...
