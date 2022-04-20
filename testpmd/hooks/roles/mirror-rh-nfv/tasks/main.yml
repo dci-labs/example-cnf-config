@@ -44,10 +44,6 @@
     src: "{{ mrn_manifest_dir.path }}/imageContentSourcePolicy.yaml"
   notify: "Delete temporary directories"
 
-- name: "Wait for a moment to machine configs (if any) to render"
-  pause:
-    seconds: 60
-
 - name: Wait for MCP status
   include_role:
     name: wait-mcp
