@@ -44,20 +44,11 @@
     src: "{{ mrn_manifest_dir.path }}/imageContentSourcePolicy.yaml"
   notify: "Delete temporary directories"
 
-- name: "Wait for a moment to machine configs (if any) to render"
-  pause:
-    seconds: 60
-
-- name: Wait for updated machine configs to be applied on the nodes
-  k8s_info:
-    api_version: machineconfiguration.openshift.io/v1
-    kind: MachineConfigPool
-  register: reg_mcpool_status
+- name: Wait for MCP status
+  include_role:
+    name: wait-mcp
   vars:
-    status_query: "resources[*].status.conditions[?type=='Updated'].status"
-    update_status: "{{ reg_mcpool_status | json_query(status_query) | flatten | unique }}"
-  until:
-    - update_status == ['True']
-  retries: 60
-  delay: 60
+    mcp_wait_retries: 60
+    mcp_wait_delay: 60
+
 ...
