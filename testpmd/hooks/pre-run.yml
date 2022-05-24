@@ -88,6 +88,7 @@
       vars:
         mcp_wait_retries: 60
         mcp_wait_delay: 60
+        mcp_reason: "Rescue after SR-IOV installation"
 
     - name: Delete all pods sriov-network-config-daemon-XXXXX
       shell: >
