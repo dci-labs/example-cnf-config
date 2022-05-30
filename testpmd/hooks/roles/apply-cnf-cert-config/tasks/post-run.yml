@@ -17,6 +17,7 @@
   shell: |
     set -ex
     {{ oc_tool_path }} label pod -n "{{ app_ns }}" "{{ item.metadata.name }}" test-network-function.com/skip_connectivity_tests-
+    {{ oc_tool_path }} label pod -n "{{ app_ns }}" "{{ item.metadata.name }}" test-network-function.com/skip_multus_connectivity_tests-
   when: example_cnf_labelled_pod_list.resources|length > 0
   loop: "{{ example_cnf_labelled_pod_list.resources }}"
 
