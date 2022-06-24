@@ -82,13 +82,14 @@
         bash {{ dci_config_dir }}/hooks/files/collect-sriov-operator-data.sh | tee {{ job_logs.path }}/collect-sriov-operator-data-rescue.txt
       ignore_errors: true
 
-    - name: Wait for MCP status
+    - name:  Wait for MCP status
       include_role:
-        name: wait-mcp
+        name: check-resource
       vars:
-        mcp_wait_retries: 60
-        mcp_wait_delay: 60
-        mcp_reason: "Rescue after SR-IOV installation"
+        check_wait_retries: 60
+        check_wait_delay: 60
+        check_reason: "Rescue after SR-IOV installation"
+        resource_to_check: "MachineConfigPool"
 
     - name: Delete all pods sriov-network-config-daemon-XXXXX
       shell: >
