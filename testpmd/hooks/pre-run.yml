@@ -85,7 +85,7 @@
     - name:  Wait for MCP status
       include_role:
         name: check-resource
-        tasks_from: mcp_workaround.yml
+        tasks_from: wait-mcp.yml
       vars:
         check_wait_retries: 60
         check_wait_delay: 60
