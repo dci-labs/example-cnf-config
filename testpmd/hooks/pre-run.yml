@@ -85,11 +85,11 @@
     - name:  Wait for MCP status
       include_role:
         name: check-resource
+        tasks_from: mcp_workaround.yml
       vars:
         check_wait_retries: 60
         check_wait_delay: 60
         check_reason: "Rescue after SR-IOV installation"
-        resource_to_check: "MachineConfigPool"
 
     - name: Delete all pods sriov-network-config-daemon-XXXXX
       shell: >

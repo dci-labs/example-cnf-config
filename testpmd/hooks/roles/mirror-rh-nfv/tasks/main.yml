@@ -47,9 +47,9 @@
 - name:  Wait for MCP status
   include_role:
     name: check-resource
+    tasks_from: mcp_workaround.yml
   vars:
     check_wait_retries: 60
     check_wait_delay: 60
     check_reason: "ICSP update in mirror-rh-nfv"
-    resource_to_check: "MachineConfigPool"
 ...
