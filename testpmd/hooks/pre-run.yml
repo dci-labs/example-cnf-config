@@ -82,7 +82,7 @@
         bash {{ dci_config_dir }}/hooks/files/collect-sriov-operator-data.sh | tee {{ job_logs.path }}/collect-sriov-operator-data-rescue.txt
       ignore_errors: true
 
-    - name:  Wait for MCP status
+    - name: Wait for MCP status
       include_role:
         name: check-resource
       vars:
