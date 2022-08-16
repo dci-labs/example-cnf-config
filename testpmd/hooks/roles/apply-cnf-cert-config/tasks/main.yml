@@ -1,11 +1,50 @@
 ---
-- block:
 
-    - name: install
-      include_tasks: install.yml
+# Label pods - only the labels related to exclude connectivity features are applied, as the
+# pods are autodiscovered based on the labels provided in tnf_targetpodlabels variable
+# in the pipeline
 
-    - name: post-run
-      include_tasks: post-run.yml
+- name: Get pods from example-cnf namespace
+  k8s_info:
+    api_version: v1
+    kind: pod
+    namespace: "{{ app_ns }}"
+  register: example_cnf_pod_list
 
-  when: do_cnf_cert|default(false)|bool
+# Labels are included after deploying the pods. However, as stated here:
+# https://github.com/test-network-function/cnf-certification-test#targetpodlabels
+# "It's highly recommended that the labels should be defined in pod definition rather 
+# than added after pod is created"
+- name: "Tag pods with autodiscovery labels related to exclude connectivity features in test suites"
+  community.kubernetes.k8s:
+    definition:
+      apiVersion: v1
+      kind: Pod
+      metadata:
+        name: "{{ pod.metadata.name }}"
+        namespace: "{{ app_ns }}"
+        labels:
+          test-network-function.com/skip_connectivity_tests: true
+          test-network-function.com/skip_multus_connectivity_tests: true
+  loop: "{{ example_cnf_pod_list.resources }}"
+  loop_control:
+    loop_var: pod
+  when: pod.metadata.name|regex_search(exclude_connectivity_regexp)
+
+# Label/Annotate operators
+
+- name: Get CSVs from example-cnf namespace
+  k8s_info:
+    api_version: operators.coreos.com/v1alpha1
+    kind: ClusterServiceVersion
+    namespace: "{{ app_ns }}"
+  register: example_cnf_csv_list
+
+- name: Update CSVs
+  include_tasks: update-csv.yml
+  loop: "{{ example_cnf_csv_list.resources }}"
+  loop_control:
+    loop_var: csv
+  when: csv.metadata.name|regex_search(operators_regexp)
+
 ...
