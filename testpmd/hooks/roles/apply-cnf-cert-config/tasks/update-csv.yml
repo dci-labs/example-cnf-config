@@ -1,0 +1,34 @@
+---
+
+- name: "Get current subscription"
+  community.kubernetes.k8s_info:
+    api: operators.coreos.com/v1alpha1
+    kind: Subscription
+    namespace: "{{ app_ns }}"
+    name: "{{ csv.metadata.name.split('.')[0] }}"
+  register: current_subscription
+
+- name: "Get Installed CSV and subscription name"
+  vars:
+    subs_details: >
+      resources[*].{ subscriptionName: metadata.name,
+        installedCSV: status.installedCSV
+      }
+  set_fact:
+    subscription: "{{ current_subscription | json_query(subs_details) | first }}"
+
+- name: "Update CSVs with autodiscovery labels/annotations to execute test suites"
+  community.kubernetes.k8s:
+    definition:
+      apiVersion: operators.coreos.com/v1alpha1
+      kind: ClusterServiceVersion
+      metadata:
+        name: "{{ subscription.installedCSV }}"
+        namespace: "{{ app_ns }}"
+        labels:
+          test-network-function.com/operator: target
+        annotations:
+          test-network-function.com/operator_tests: "['OPERATOR_STATUS']"
+          test-network-function.com/subscription_name: "{{ subscription.subscriptionName }}"
+
+...
