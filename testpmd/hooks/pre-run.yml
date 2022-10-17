@@ -23,11 +23,20 @@
     mac_workaround_enable: false
 
 - name: "Create CNF Namespace"
-  k8s:
-    api_version: v1
-    kind: Namespace
+  vars:
+    ns_template: |-
+      apiVersion: v1
+      kind: Namespace
+      metadata:
+        name: "{{ cnf_namespace }}"
+        {% if ocp_version is version("4.12", ">=") -%}
+        labels:
+          pod-security.kubernetes.io/enforce: privileged
+          pod-security.kubernetes.io/enforce-version: latest
+        {% endif -%}
+  community.kubernetes.k8s:
     state: present
-    name: "{{ cnf_namespace }}"
+    definition: "{{ ns_template | from_yaml }}"
 
 # Expecting variables in an array on this form
 # sriov_network:
