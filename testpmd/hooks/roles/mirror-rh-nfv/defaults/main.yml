@@ -1,5 +1,0 @@
----
-mrn_index_image: "{{ example_cnf_index_image | default('quay.io/rh-nfv-int/nfv-example-cnf-catalog:v0.2.6') }}"
-mrn_local_registry: "{{ local_registry_host | default('registry.dfwt5g.lab') }}:{{ local_registry_port | default('4443') }}"
-mrn_mirror_index_image: "{{ mrn_index_image | regex_replace('^[^/]+', mrn_local_registry) }}"
-mrn_pull_secret: "{{ dci_pullsecret_file|default('/opt/cache/pull-secret.txt') }}"
