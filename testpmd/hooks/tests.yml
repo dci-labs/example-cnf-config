@@ -12,6 +12,5 @@
     opcap_target_catalog_source: "nfv-example-cnf-catalog"
     opcap_catalog_source_namespace: "openshift-marketplace"
     opcap_output_dir: "{{ job_logs.path }}"
-    opcap_audit_plan: "OperatorInstall,OperandInstall,OperandCleanUp,OperatorCleanUp"
 
 ...
