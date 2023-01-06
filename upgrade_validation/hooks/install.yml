@@ -1,1 +1,5 @@
 ---
+- name: Validation after the upgrade
+  include_role:
+    name: "{{ dci_config_dir }}/hooks/{{ cluster_name }}/nfv-example-cnf-deploy/roles/example-cnf-validate"
+    tasks_from: validate.yml
