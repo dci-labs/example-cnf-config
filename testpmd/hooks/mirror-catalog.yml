@@ -3,6 +3,7 @@
   include_role:
     name: mirror_images
   vars:
+    authfile: "{{ pullsecret_tmp_file }}"
     images:
       - "{{ example_cnf_index_image }}"
 
@@ -13,10 +14,10 @@
     mc_oc_tool_path: "{{ oc_tool_path }}"
     mc_catalog: "{{ example_cnf_index_image }}"
     mc_registry: "{{ local_registry }}"
-    mc_pullsecret: "{{ dci_pullsecret_file }}"
+    mc_pullsecret: "{{ pullsecret_tmp_file }}"
   when:
     - local_registry | length
-    - dci_pullsecret_file is defined
+    - pullsecret_tmp_file is defined
 
 - name: Apply ImageContentSourcePolicy
   community.kubernetes.k8s:
