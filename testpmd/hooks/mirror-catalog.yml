@@ -1,0 +1,39 @@
+---
+- name: Mirror catalog image
+  include_role:
+    name: mirror_images
+  vars:
+    authfile: "{{ pullsecret_tmp_file }}"
+    images:
+      - "{{ example_cnf_index_image }}"
+
+- name: Mirror images in the catalog
+  include_role:
+    name: mirror-catalog
+  vars:
+    mc_oc_tool_path: "{{ oc_tool_path }}"
+    mc_catalog: "{{ example_cnf_index_image }}"
+    mc_registry: "{{ local_registry }}"
+    mc_pullsecret: "{{ pullsecret_tmp_file }}"
+  when:
+    - local_registry | length
+    - pullsecret_tmp_file is defined
+
+- name: Apply ImageContentSourcePolicy
+  community.kubernetes.k8s:
+    src: "{{ mc_icsp_file.path }}"
+
+- name: Wait for MCP status
+  include_role:
+    name: check-resource
+  vars:
+    resource_to_check: "MachineConfigPool"
+    check_wait_retries: 60
+    check_wait_delay: 60
+    check_reason: "ICSP update in mirror-rh-nfv"
+
+- name: Delete ImageContentSorucePolicy file
+  file:
+    path: "{{ mc_icsp_file.path }}"
+    state: absent
+  when: mc_icsp_file is defined

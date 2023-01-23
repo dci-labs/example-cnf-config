@@ -132,12 +132,10 @@
     state: latest
   become: true
 
-- name: Mirror rh-nfv images when disconnected
-  include_role:
-    name: "{{ dci_config_dir }}/hooks/roles/mirror-rh-nfv"
+- name: Mirror catalog in disconnected environment
+  include_tasks: mirror-catalog.yml
   when:
-    - dci_disconnected is defined
-    - dci_disconnected|bool
+    - dci_disconnected | default(false) | bool
 
 - name: Deploy NFV Example CNF catalog
   include_role:

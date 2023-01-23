@@ -1,5 +1,0 @@
----
-- name: "Delete temporary directories"
-  file:
-    path: "{{ mrn_manifest_dir }}"
-    state: absent
