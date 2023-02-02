@@ -12,7 +12,7 @@
 
 - name: Create example-cnf facts
   set_fact:
-    app_version: v0.2.3
+    app_version: v0.2.6
     cnf_app_networks:
       - name: intel-numa0-net1
         count: 2
