@@ -1,4 +1,27 @@
 ---
+- name: Select event from the default T-REX Profile
+  community.kubernetes.k8s_info:
+    api_version: v1
+    kind: Event
+    namespace: "{{ dci_openshift_app_ns|default('example-cnf') }}"
+    field_selectors:
+      - involvedObject.name = trex-app1
+  register: default_events
+
+- name: Remove events from the default T-REX Profile
+  community.kubernetes.k8s:
+    api_version: v1
+    kind: Event
+    state: absent
+    namespace: "{{ dci_openshift_app_ns|default('example-cnf') }}"
+    wait: yes
+    metadata:
+      name: "{{ event.metadata.name }}"
+    loop: "{{ default_events.resources }}"
+    loop_control:
+      loop_var: event
+    when: default_events|length
+
 - name: Validation after the upgrade
   include_role:
     name: "{{ cnf_tmp_dir.path }}/nfv-example-cnf-deploy/roles/example-cnf-validate"
