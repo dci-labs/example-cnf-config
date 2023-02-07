@@ -5,7 +5,7 @@
     kind: Event
     namespace: "{{ dci_openshift_app_ns|default('example-cnf') }}"
     field_selectors:
-      - involvedObject.name = trex-app1
+      - involvedObject.name=trex-app1
   register: default_events
 
 - name: Remove events from the default T-REX Profile
@@ -15,12 +15,13 @@
     state: absent
     namespace: "{{ dci_openshift_app_ns|default('example-cnf') }}"
     wait: yes
-    metadata:
-      name: "{{ event.metadata.name }}"
+    name: "{{ event.metadata.name }}"
     loop: "{{ default_events.resources }}"
     loop_control:
       loop_var: event
-    when: default_events|length
+    when:
+       - "'resources' in default_events"
+       - default_events.resources | length
 
 - name: Validation after the upgrade
   include_role:
