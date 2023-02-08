@@ -16,12 +16,12 @@
     namespace: "{{ dci_openshift_app_ns|default('example-cnf') }}"
     wait: yes
     name: "{{ event.metadata.name }}"
-    loop: "{{ default_events.resources }}"
-    loop_control:
-      loop_var: event
-    when:
-       - "'resources' in default_events"
-       - default_events.resources | length
+  loop: "{{ default_events.resources }}"
+  loop_control:
+    loop_var: event
+  when:
+    - "'resources' in default_events"
+    - default_events.resources | length
 
 - name: Validation after the upgrade
   include_role:
