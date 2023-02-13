@@ -1,4 +1,8 @@
 ---
+- name: List all workers
+  shell: >
+    {{ oc_tool_path }} get nodes --no-headers=true --selector='!node-role.kubernetes.io/master'
+
 - name: Get number of workers
   shell: >
     {{ oc_tool_path }} get nodes --no-headers=true --selector='!node-role.kubernetes.io/master' | wc -l
