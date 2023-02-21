@@ -51,3 +51,7 @@ $ dci-pipeline cnf:ansible_inventory=/var/lib/dci/inventories/dallas/8nodes/clus
 ```
 TBD
 ```
+
+### Upgrade validation
+When run during an upgrade, an extra DCI hook can be called to gather information from the CNF behavior.
+See [upgrade validation doc](upgrade_validation/README.md).
