@@ -1,5 +1,5 @@
 ---
-- name: Select event from the default T-REX Profile
+- name: "Select event from the default T-REX Profile"
   community.kubernetes.k8s_info:
     api_version: v1
     kind: Event
@@ -8,7 +8,7 @@
       - involvedObject.name=trex-app1
   register: default_events
 
-- name: Remove events from the default T-REX Profile
+- name: "Remove events from the default T-REX Profile"
   community.kubernetes.k8s:
     api_version: v1
     kind: Event
@@ -23,7 +23,41 @@
     - "'resources' in default_events"
     - default_events.resources | length
 
-- name: Validation after the upgrade
+- name: "Validation after the upgrade"
   include_role:
     name: "{{ cnf_tmp_dir.path }}/nfv-example-cnf-deploy/roles/example-cnf-validate"
     tasks_from: validate.yml
+
+- name: "run k8s info on jobs"
+  community.kubernetes.k8s_info:
+    kind: Job
+    namespace: "{{ dci_openshift_app_ns|default('example-cnf') }}"
+  register: job
+  retries: 3
+  delay: 10
+
+- name: "Set list of job names"
+  set_fact:
+      list: "{{ job | json_query('resources[*].metadata.name')}}"
+
+- name: "Retrieve logs from jobs"
+  community.kubernetes.k8s_log:
+    namespace: "{{ dci_openshift_app_ns|default('example-cnf') }}"
+    label_selectors:
+      - job-name={{ job_name }}
+  register: logs
+  ignore_errors: true
+  loop: "{{ list }}"
+  loop_control:
+    loop_var: job_name
+
+- name: Store logs when jobs_logs is defined
+  copy:
+    content: "{{ job_out.log }}"
+    dest: "{{ job_logs.path }}/{{ job_out.job_name}}.log"
+  ignore_errors: true
+  loop: "{{ logs.results }}"
+  loop_control:
+    loop_var: job_out
+  when:
+    - logs is defined
