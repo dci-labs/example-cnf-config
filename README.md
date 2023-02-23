@@ -53,5 +53,5 @@ TBD
 ```
 
 ### Upgrade validation
-When run during an upgrade, an extra DCI hook can be called to gather information from the CNF behavior.
+When run during an upgrade, an extra DCI hook can be called to gather information about the CNF behavior.
 See [upgrade validation doc](upgrade_validation/README.md).
