@@ -75,7 +75,8 @@
 # SR-IOV operator reports networks to be well-created,
 # but then it takes several minutes
 # to see them allocatable on the worker nodes.
-# We probably have to open a BZ.
+# OCPBUGS created in case of issues (OCP 4.12/13/14) - https://issues.redhat.com/browse/OCPBUGS-13278
+# Workaround included in check-resource common role in dci-openshift-agent for the moment
 - name: Ensure that SR-IOV networks are allocatable on the nodes
   block:
     - name: Wait to have all networks allocatable on worker nodes
