@@ -7,6 +7,6 @@ spec:
   networkNamespace: "{{ cnf_namespace }}"
   vlan: {{ sriov['vlan']|int }}
   resourceName: "{{ sriov['resource'] }}"
-  spoofChk: "on"
-  trust: "on"
-  ipam: '{ }'
+  spoofChk: "{{ sriov['spoofchk'] | defaults('off') }}"
+  trust: "{{ sriov['trust'] | defaults('on') }}"
+  ipam: "{{ sriov['ipam'] | defaults('{}') }}"
