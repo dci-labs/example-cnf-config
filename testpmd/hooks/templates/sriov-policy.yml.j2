@@ -14,7 +14,7 @@ spec:
   numVfs: {{ sriov['numvfs'] }}
   nicSelector:
 {% if sriov['vendor'] is defined %}
-    vendor: "{{ sriov['vendor'] }}'
+    vendor: "{{ sriov['vendor'] }}"
 {% endif %}
 {% if sriov['deviceid'] is defined %}
     deviceID: "{{ sriov['deviceid'] }}"
