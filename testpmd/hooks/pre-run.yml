@@ -52,11 +52,11 @@
             example_cnf_index_image: "quay.io/rh-nfv-int/nfv-example-cnf-catalog:{{ index_output.stdout }}"
             app_version: "{{ app_output.stdout }}"
 
-#         - name: 'Remove  component from the job'
-#           dci_job_component:
-#             component_id: "{{ git_operator_component_id }}"
-#             job_id: " {{ job_id }} "
-#             state: absent
+        - name: 'Remove  component from the job'
+          dci_job_component:
+            component_id: "{{ operator_component_id }}"
+            job_id: " {{ job_id }} "
+            state: absent
 
       when: examplecnf_change_dir.stat.exists and examplecnf_change_dir.stat.isdir
   when:
