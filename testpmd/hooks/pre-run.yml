@@ -19,7 +19,7 @@
   with_items: "{{ hostvars.localhost.job_info.job.components }}"
   when: item["type"] == "nfv-example-cnf-index"
 
-- name: Check change presence
+- name: Check example-cnf change presence
   block:
     - name: Check if example-cnf is part of the change
       stat:
@@ -28,8 +28,9 @@
 
     - block:
         - name: Generate versions
-          shell: "./generate-versions.sh {{ job_logs.path }}/versions.cfg pr$(jq -r .number ../example-cnf-[0-9]*.json).$(jq -r .head.sha ../example-cnf-[0-9]*.json|cut -c1-8)"
+          shell: 'JSON=$(ls ../example-cnf-[0-9]*.json); if [ -z "$JSON" ]; then JSON=../github.json; fi; ./generate-versions.sh {{ job_logs.path }}/versions.cfg pr$(jq -r .number $JSON).$(jq -r .head.sha $JSON|cut -c1-8)'
           args:
+            executable: /bin/bash
             chdir: "{{ dci_change_dir }}/example-cnf"
 
         - name: Get index version
@@ -52,13 +53,23 @@
             example_cnf_index_image: "quay.io/rh-nfv-int/nfv-example-cnf-catalog:{{ index_output.stdout }}"
             app_version: "{{ app_output.stdout }}"
 
-#         - name: 'Remove  component from the job'
-#           dci_job_component:
-#             component_id: "{{ git_operator_component_id }}"
-#             job_id: " {{ job_id }} "
-#             state: absent
+        - name: 'Remove  component from the job'
+          dci_job_component:
+            component_id: "{{ operator_component_id }}"
+            job_id: " {{ job_id }} "
+            state: absent
 
       when: examplecnf_change_dir.stat.exists and examplecnf_change_dir.stat.isdir
+
+    - name: Check if nfv-example-cnf-deploy is part of the change
+      stat:
+        path: "{{ dci_change_dir }}/nfv-example-cnf-deploy"
+      register: deploy_change_dir
+
+    - name: Override the deploy_dir variable
+      set_fact:
+        deploy_dir: "{{ dci_change_dir }}/nfv-example-cnf-deploy"
+      when: deploy_change_dir.stat.exists and deploy_change_dir.stat.isdir
   when:
     - dci_change_dir is defined
 
@@ -153,16 +164,6 @@
   ignore_errors: true
   no_log: true
 
-- name: Checkout Example CNF deployment role
-  git:
-    repo: "https://github.com/rh-nfv-int/nfv-example-cnf-deploy.git"
-    dest: "{{ dci_config_dir }}/hooks/{{ cluster_name }}/nfv-example-cnf-deploy"
-    version: "{{ example_cnf_deploy_script_version|default('master') }}"
-    update: yes
-  register: gitresult
-
-- debug: msg="Git hash is {{ gitresult.after }}"
-
 - name: "Install required rpm packages"
   package:
     name:
@@ -174,6 +175,25 @@
     state: latest
   become: true
 
+- block:
+    - name: Checkout Example CNF deployment roles
+      git:
+        repo: "https://github.com/rh-nfv-int/nfv-example-cnf-deploy.git"
+        dest: "{{ dci_config_dir }}/hooks/{{ cluster_name }}/nfv-example-cnf-deploy"
+        version: "{{ example_cnf_deploy_script_version|default('master') }}"
+        update: true
+      register: gitresult
+
+    - debug: msg="Git hash is {{ gitresult.after }}"
+
+    - name: Set the deploy_dir variable
+      set_fact:
+        deploy_dir: "{{ dci_config_dir }}/hooks/{{ cluster_name }}/nfv-example-cnf-deploy"
+
+  when:
+    - deploy_dir is not defined
+
+
 - name: Mirror catalog in disconnected environment
   include_tasks: mirror-catalog.yml
   when:
@@ -181,6 +201,6 @@
 
 - name: Deploy NFV Example CNF catalog
   include_role:
-    name: "{{ dci_config_dir }}/hooks/{{ cluster_name }}/nfv-example-cnf-deploy/roles/example-cnf-catalog"
+    name: "{{ deploy_dir }}/roles/example-cnf-catalog"
 
 ...
