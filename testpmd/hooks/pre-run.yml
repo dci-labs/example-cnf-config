@@ -28,7 +28,7 @@
 
     - block:
         - name: Generate versions
-          shell: "./generate-versions.sh {{ job_logs.path }}/versions.cfg pr$(jq -r .number ../example-cnf-[0-9]*.json).$(jq -r .head.sha ../example-cnf-[0-9]*.json|cut -c1-8)"
+          shell: 'JSON=$(ls ../example-cnf-[0-9]*.json); if [ -z "$JSON" ]; then JSON=../github.json; fi; ./generate-versions.sh {{ job_logs.path }}/versions.cfg pr$(jq -r .number $JSON).$(jq -r .head.sha $JSON|cut -c1-8)'
           args:
             chdir: "{{ dci_change_dir }}/example-cnf"
 
