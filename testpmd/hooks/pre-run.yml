@@ -2,7 +2,6 @@
 
 - name: Create example-cnf facts
   set_fact:
-    app_version: v0.2.6
     cnf_app_networks:
       - name: intel-numa0-net1
         count: 2
@@ -41,18 +40,10 @@
             executable: /bin/bash
             chdir: "{{ dci_change_dir }}/example-cnf"
 
-        - name: Get app version
-          shell: ". {{ job_logs.path }}/versions.cfg && echo v${VERSIONS[testpmd-container-app]}"
-          register: app_output
-          args:
-            executable: /bin/bash
-            chdir: "{{ dci_change_dir }}/example-cnf"
-
         - name: Override index and app variables
           set_fact:
             operator_version: "{{ index_output.stdout }}"
             example_cnf_index_image: "quay.io/rh-nfv-int/nfv-example-cnf-catalog:{{ index_output.stdout }}"
-            app_version: "{{ app_output.stdout }}"
 
         - name: 'Remove  component from the job'
           dci_job_component:
