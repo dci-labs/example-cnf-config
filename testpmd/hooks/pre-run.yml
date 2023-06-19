@@ -1,4 +1,5 @@
 ---
+
 - name: Create example-cnf facts
   set_fact:
     app_version: v0.2.8
@@ -40,18 +41,10 @@
             executable: /bin/bash
             chdir: "{{ dci_change_dir }}/example-cnf"
 
-        - name: Get app version
-          shell: ". {{ job_logs.path }}/versions.cfg && echo v${VERSIONS[testpmd-container-app]}"
-          register: app_output
-          args:
-            executable: /bin/bash
-            chdir: "{{ dci_change_dir }}/example-cnf"
-
         - name: Override index and app variables
           set_fact:
             operator_version: "{{ index_output.stdout }}"
             example_cnf_index_image: "quay.io/rh-nfv-int/nfv-example-cnf-catalog:{{ index_output.stdout }}"
-            app_version: "{{ app_output.stdout }}"
 
         - name: 'Remove  component from the job'
           dci_job_component:
@@ -72,6 +65,40 @@
       when: deploy_change_dir.stat.exists and deploy_change_dir.stat.isdir
   when:
     - dci_change_dir is defined
+
+- name: Create the preflight_operators_to_certify variable
+  when:
+    - certify_operators | default(false) | bool
+    - example_cnf_index_image is defined
+  block:
+    - name: Get Catalog Data
+      ansible.builtin.shell:
+        cmd: >
+          set -e -o pipefail;
+          ~/clusterconfigs-{{ cluster_name }}/opm render
+          {{ example_cnf_index_image }} |
+          jq -r '.relatedImages[].image'
+      args:
+        executable: /bin/bash
+      register: catalog_data_cmd
+      retries: 1
+      delay: 5
+      until:
+        - catalog_data_cmd.rc == 0
+
+    - name: Create an empty preflight_operators_to_certify variable
+      ansible.builtin.set_fact:
+        preflight_operators_to_certify: []
+
+    - name: Populate the preflight_operators_to_certify variable
+      ansible.builtin.set_fact:
+        preflight_operators_to_certify: "{{ preflight_operators_to_certify + [dict(bundle_image=item, index_image=example_cnf_index_image)] }}"
+      when: '"bundle@" in item'
+      loop: "{{ catalog_data_cmd.stdout_lines }}"
+
+    - name: Display the prefight_operators_to_certify variable
+      ansible.builtin.debug:
+        msg: "{{ preflight_operators_to_certify }}"
 
 - name: "Create CNF Namespace"
   community.kubernetes.k8s:
@@ -115,6 +142,7 @@
   loop_control:
     loop_var: sriov
   when: sriov_network is defined
+  tags: [sriov]
 
 - name: Create SriovNetwork
   k8s:
@@ -123,6 +151,7 @@
   loop_control:
     loop_var: sriov
   when: sriov_network is defined
+  tags: [sriov]
 
 # SR-IOV operator reports networks to be well-created,
 # but then it takes several minutes
@@ -130,6 +159,7 @@
 # OCPBUGS created in case of issues (OCP 4.12/13/14) - https://issues.redhat.com/browse/OCPBUGS-13278
 # Workaround included in check-resource common role in dci-openshift-agent for the moment
 - name: Ensure that SR-IOV networks are allocatable on the nodes
+  tags: [sriov]
   block:
     - name: Wait to have all networks allocatable on worker nodes
       include_role:
@@ -160,6 +190,7 @@
         name: "{{ dci_config_dir }}/hooks/roles/sriov-networks"
 
 - name: SR-IOV must-gather
+  tags: [sriov]
   script: "{{ dci_config_dir }}/hooks/files/collect-sriov-operator-data.sh {{ oc_tool_path }} | tee {{ job_logs.path }}/collect-sriov-operator-data.txt"
   ignore_errors: true
   no_log: true
