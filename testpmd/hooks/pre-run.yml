@@ -1,14 +1,4 @@
 ---
-- name: "Set working namespace"
-  set_fact:
-    cnf_namespace: "example-cnf"
-
-- name: Get example-cnf component details from job.components
-  set_fact:
-    operator_version: "{{ item['name'] }}"
-    example_cnf_index_image: "{{ item['data']['url'] }}:{{ item['name'] }}"
-  with_items: "{{ hostvars.localhost.job_info.job.components }}"
-  when: item["type"] == "nfv-example-cnf-index"
 
 - name: Create example-cnf facts
   set_fact:
@@ -20,6 +10,95 @@
       - name: intel-numa0-net2
         count: 2
     mac_workaround_enable: false
+    cnf_namespace: "example-cnf"
+
+- name: Get example-cnf component details from job.components
+  set_fact:
+    operator_version: "{{ item['version'] }}"
+    example_cnf_index_image: "{{ item['data']['url'] }}:{{ item['version'] }}"
+    operator_component_id: "{{ item['id'] }}"
+  with_items: "{{ hostvars.localhost.job_info.job.components }}"
+  when: item["type"] == "nfv-example-cnf-index"
+
+- name: Check example-cnf change presence
+  block:
+    - name: Check if example-cnf is part of the change
+      stat:
+        path: "{{ dci_change_dir }}/example-cnf"
+      register: examplecnf_change_dir
+
+    - block:
+        - name: Generate versions
+          shell: 'JSON=$(ls ../example-cnf-[0-9]*.json); if [ -z "$JSON" ]; then JSON=../github.json; fi; ./generate-versions.sh {{ job_logs.path }}/versions.cfg pr$(jq -r .number $JSON).$(jq -r .head.sha $JSON|cut -c1-8)'
+          args:
+            executable: /bin/bash
+            chdir: "{{ dci_change_dir }}/example-cnf"
+
+        - name: Get index version
+          shell: ". {{ job_logs.path }}/versions.cfg && echo v${VERSIONS[nfv-example-cnf-index]}"
+          register: index_output
+          args:
+            executable: /bin/bash
+            chdir: "{{ dci_change_dir }}/example-cnf"
+
+        - name: Override index and app variables
+          set_fact:
+            operator_version: "{{ index_output.stdout }}"
+            example_cnf_index_image: "quay.io/rh-nfv-int/nfv-example-cnf-catalog:{{ index_output.stdout }}"
+
+        - name: 'Remove  component from the job'
+          dci_job_component:
+            component_id: "{{ operator_component_id }}"
+            job_id: " {{ job_id }} "
+            state: absent
+
+      when: examplecnf_change_dir.stat.exists and examplecnf_change_dir.stat.isdir
+
+    - name: Check if nfv-example-cnf-deploy is part of the change
+      stat:
+        path: "{{ dci_change_dir }}/nfv-example-cnf-deploy"
+      register: deploy_change_dir
+
+    - name: Override the deploy_dir variable
+      set_fact:
+        deploy_dir: "{{ dci_change_dir }}/nfv-example-cnf-deploy"
+      when: deploy_change_dir.stat.exists and deploy_change_dir.stat.isdir
+  when:
+    - dci_change_dir is defined
+
+- name: Create the preflight_operators_to_certify variable
+  when:
+    - certify_operators | default(false) | bool
+    - example_cnf_index_image is defined
+  block:
+    - name: Get Catalog Data
+      ansible.builtin.shell:
+        cmd: >
+          set -e -o pipefail;
+          ~/clusterconfigs-{{ cluster_name }}/opm render
+          {{ example_cnf_index_image }} |
+          jq -r '.relatedImages[].image'
+      args:
+        executable: /bin/bash
+      register: catalog_data_cmd
+      retries: 1
+      delay: 5
+      until:
+        - catalog_data_cmd.rc == 0
+
+    - name: Create an empty preflight_operators_to_certify variable
+      ansible.builtin.set_fact:
+        preflight_operators_to_certify: []
+
+    - name: Populate the preflight_operators_to_certify variable
+      ansible.builtin.set_fact:
+        preflight_operators_to_certify: "{{ preflight_operators_to_certify + [dict(bundle_image=item, index_image=example_cnf_index_image)] }}"
+      when: '"bundle@" in item'
+      loop: "{{ catalog_data_cmd.stdout_lines }}"
+
+    - name: Display the prefight_operators_to_certify variable
+      ansible.builtin.debug:
+        msg: "{{ preflight_operators_to_certify }}"
 
 - name: "Create CNF Namespace"
   community.kubernetes.k8s:
@@ -63,6 +142,7 @@
   loop_control:
     loop_var: sriov
   when: sriov_network is defined
+  tags: [sriov]
 
 - name: Create SriovNetwork
   k8s:
@@ -71,12 +151,15 @@
   loop_control:
     loop_var: sriov
   when: sriov_network is defined
+  tags: [sriov]
 
 # SR-IOV operator reports networks to be well-created,
 # but then it takes several minutes
 # to see them allocatable on the worker nodes.
-# We probably have to open a BZ.
+# OCPBUGS created in case of issues (OCP 4.12/13/14) - https://issues.redhat.com/browse/OCPBUGS-13278
+# Workaround included in check-resource common role in dci-openshift-agent for the moment
 - name: Ensure that SR-IOV networks are allocatable on the nodes
+  tags: [sriov]
   block:
     - name: Wait to have all networks allocatable on worker nodes
       include_role:
@@ -107,19 +190,10 @@
         name: "{{ dci_config_dir }}/hooks/roles/sriov-networks"
 
 - name: SR-IOV must-gather
+  tags: [sriov]
   script: "{{ dci_config_dir }}/hooks/files/collect-sriov-operator-data.sh {{ oc_tool_path }} | tee {{ job_logs.path }}/collect-sriov-operator-data.txt"
   ignore_errors: true
   no_log: true
-
-- name: Checkout Example CNF deployment role
-  git:
-    repo: "https://github.com/rh-nfv-int/nfv-example-cnf-deploy.git"
-    dest: "{{ dci_config_dir }}/hooks/{{ cluster_name }}/nfv-example-cnf-deploy"
-    version: "{{ example_cnf_deploy_script_version|default('master') }}"
-    update: yes
-  register: gitresult
-
-- debug: msg="Git hash is {{ gitresult.after }}"
 
 - name: "Install required rpm packages"
   package:
@@ -132,6 +206,25 @@
     state: latest
   become: true
 
+- block:
+    - name: Checkout Example CNF deployment roles
+      git:
+        repo: "https://github.com/rh-nfv-int/nfv-example-cnf-deploy.git"
+        dest: "{{ dci_config_dir }}/hooks/{{ cluster_name }}/nfv-example-cnf-deploy"
+        version: "{{ example_cnf_deploy_script_version|default('master') }}"
+        update: true
+      register: gitresult
+
+    - debug: msg="Git hash is {{ gitresult.after }}"
+
+    - name: Set the deploy_dir variable
+      set_fact:
+        deploy_dir: "{{ dci_config_dir }}/hooks/{{ cluster_name }}/nfv-example-cnf-deploy"
+
+  when:
+    - deploy_dir is not defined
+
+
 - name: Mirror catalog in disconnected environment
   include_tasks: mirror-catalog.yml
   when:
@@ -139,6 +232,6 @@
 
 - name: Deploy NFV Example CNF catalog
   include_role:
-    name: "{{ dci_config_dir }}/hooks/{{ cluster_name }}/nfv-example-cnf-deploy/roles/example-cnf-catalog"
+    name: "{{ deploy_dir }}/roles/example-cnf-catalog"
 
 ...

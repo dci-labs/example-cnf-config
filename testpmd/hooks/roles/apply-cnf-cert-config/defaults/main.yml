@@ -1,7 +1,6 @@
 ---
 # app_ns could also be: "{{ tnf_config[0].namespace|default('example-cnf') }}"
 app_ns: "{{ dci_openshift_app_ns|default('example-cnf') }}"
-operators_regexp: "{{ tnf_config[0].operators_regexp|default('cnf-app-mac|testpmd-lb-operator|testpmd-operator|trex-operator') }}"
 exclude_connectivity_regexp: "{{ tnf_config[0].exclude_connectivity_regexp|default('loadbalancer|testpmd-app') }}"
 
 ...
