@@ -3,7 +3,7 @@
   community.kubernetes.k8s_info:
     api_version: v1
     kind: Event
-    namespace: "{{ dci_openshift_app_ns|default('example-cnf') }}"
+    namespace: "{{ cnf_namespace|default('example-cnf') }}"
     field_selectors:
       - involvedObject.name=trex-app1
   register: default_events
@@ -13,7 +13,7 @@
     api_version: v1
     kind: Event
     state: absent
-    namespace: "{{ dci_openshift_app_ns|default('example-cnf') }}"
+    namespace: "{{ cnf_namespace|default('example-cnf') }}"
     wait: yes
     name: "{{ event.metadata.name }}"
   loop: "{{ default_events.resources }}"
@@ -31,7 +31,7 @@
 - name: "run k8s info on jobs"
   community.kubernetes.k8s_info:
     kind: Job
-    namespace: "{{ dci_openshift_app_ns|default('example-cnf') }}"
+    namespace: "{{ cnf_namespace|default('example-cnf') }}"
   register: job
   retries: 3
   delay: 10
@@ -42,7 +42,7 @@
 
 - name: "Retrieve logs from jobs"
   community.kubernetes.k8s_log:
-    namespace: "{{ dci_openshift_app_ns|default('example-cnf') }}"
+    namespace: "{{ cnf_namespace|default('example-cnf') }}"
     label_selectors:
       - job-name={{ job_name }}
   register: logs
