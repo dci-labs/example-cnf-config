@@ -1,6 +1,6 @@
 ---
 # app_ns could also be: "{{ tnf_config[0].namespace|default('example-cnf') }}"
-app_ns: "{{ cnf_namespace|default('example-cnf') }}"
+app_ns: "{{ cnf_namespace }}"
 exclude_connectivity_regexp: "{{ tnf_config[0].exclude_connectivity_regexp|default('loadbalancer|testpmd-app') }}"
 
 ...
