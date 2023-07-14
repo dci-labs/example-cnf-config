@@ -112,6 +112,10 @@
           pod-security.kubernetes.io/enforce: "privileged"
           pod-security.kubernetes.io/enforce-version: "latest"
 
+- name: "Add CNF Namespace to the list of NS to get logs from"
+  set_fact:
+    ns_list: "{{ ns_list|default([]) + [ cnf_namespace ] }}"
+
 # Expecting variables in an array on this form
 # sriov_network:
 #  - name: intel-numa0-net1
