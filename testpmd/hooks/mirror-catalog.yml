@@ -19,53 +19,9 @@
     - dci_local_registry | length
     - pullsecret_tmp_file is defined
 
-# Workaround while oc_tool_path stable includes IDMS support
-# IDMS support is available in 4.14
-- name: Find ImageDigestMirrorSet in the cluster
-  community.kubernetes.k8s_info:
-    api_version: config.openshift.io/v1
-    kind: ImageDigestMirrorSet
-  register: idms_resources
-
-- name: Set image source kind
-  set_fact:
-    image_source_kind: >
-      {{ idms_resources.resources |
-         length |
-         ternary('ImageDigestMirrorSet', 'ImageContentSourcePolicy')
-      }}
-
-- name: Set Image Source file
-  set_fact:
-    example_cnf_is_file: "{{ mc_is_file.path }}"
-
-- name: Create temporary directory
-  tempfile:
-    state: directory
-    prefix: example-cnf
-  register: example_cnf_tmp_dir
-
-- name: Migrate ICSP to IDMS
-  when:
-    - image_source_kind == 'ImageDigestMirrorSet'
-    - "'imageContentSourcePolicy.yaml' in example_cnf_is_file"
-  block:
-    - name: Transform ICSP to IDMS
-      shell:
-        cmd: >
-          {{ oc_tool_path }} adm migrate icsp
-          {{ example_cnf_is_file }}
-          --dest-dir {{ example_cnf_tmp_dir.path }}
-      register: migrate_result
-
-    - name: Set new image source file
-      set_fact:
-        example_cnf_is_file: "{{ migrate_result.stdout_lines[0].split(' ')[-1] }}"
-# End of IDMS workaround
-
 - name: Apply Image Source file
   community.kubernetes.k8s:
-    src: "{{ example_cnf_is_file }}"
+    src: "{{ mc_is_file.path }}"
 
 - name: Wait for MCP status
   include_role:
@@ -82,8 +38,3 @@
     state: absent
   when: mc_is_file is defined
 
-- name: Delete example-cnf temporary directory
-  file:
-    path: "{{ example_cnf_tmp_dir.path }}"
-    state: absent
-  when: example_cnf_tmp_dir is defined
