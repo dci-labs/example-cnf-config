@@ -7,6 +7,12 @@
     images:
       - "{{ example_cnf_index_image }}"
 
+- name: Find ImageDigestMirrorSet in the cluster
+  community.kubernetes.k8s_info:
+    api_version: config.openshift.io/v1
+    kind: ImageDigestMirrorSet
+  register: idms_res
+
 - name: Mirror images in the catalog
   include_role:
     name: mirror-catalog
@@ -15,6 +21,7 @@
     mc_catalog: "{{ example_cnf_index_image }}"
     mc_registry: "{{ dci_local_registry }}"
     mc_pullsecret: "{{ pullsecret_tmp_file }}"
+    mc_is_type: "{{ idms_res.resources is defined and idms_res.resources | length | ternary('idms', 'icsp') }}"
   when:
     - dci_local_registry | length
     - pullsecret_tmp_file is defined
