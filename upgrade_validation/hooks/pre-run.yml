@@ -2,6 +2,7 @@
 - name: Create example-cnf facts
   set_fact:
     cnf_namespace: "example-cnf"
+    trex_app_first_cr: "{{ trex_app_cr_name | default('trex-app')}}"
 
 - name: "Create leading directories"
   tempfile:
