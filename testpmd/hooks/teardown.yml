@@ -1,0 +1,26 @@
+---
+- name: Delete TRexConfig CR
+  k8s:
+    namespace: "{{ cnf_namespace }}"
+    kind: TRexConfig
+    name: "{{ trex_cr_name }}"
+    state: absent
+
+- name: Delete TRexApp CR
+  k8s:
+    namespace: "{{ cnf_namespace }}"
+    kind: TRexApp
+    name: "{{ trex_app_cr_name }}"
+    state: absent
+
+- name: Check for deletion of TRex server pods
+  k8s_info:
+    namespace: "{{ cnf_namespace }}"
+    kind: Pod
+    label_selectors:
+      - example-cnf-type=pkt-gen
+  register: trex_result
+  retries: 30
+  delay: 5
+  until: "trex_result.resources|length == 0"
+...
