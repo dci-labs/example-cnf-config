@@ -7,6 +7,12 @@
     images:
       - "{{ example_cnf_index_image }}"
 
+- name: Find ImageDigestMirrorSet in the cluster
+  community.kubernetes.k8s_info:
+    api_version: config.openshift.io/v1
+    kind: ImageDigestMirrorSet
+  register: idms_res
+
 - name: Mirror images in the catalog
   include_role:
     name: mirror-catalog
@@ -15,13 +21,14 @@
     mc_catalog: "{{ example_cnf_index_image }}"
     mc_registry: "{{ dci_local_registry }}"
     mc_pullsecret: "{{ pullsecret_tmp_file }}"
+    mc_is_type: "{{ idms_res.resources is defined and idms_res.resources | length | ternary('idms', 'icsp') }}"
   when:
     - dci_local_registry | length
     - pullsecret_tmp_file is defined
 
-- name: Apply ImageContentSourcePolicy
+- name: Apply Image Source file
   community.kubernetes.k8s:
-    src: "{{ mc_icsp_file.path }}"
+    src: "{{ mc_is_file.path }}"
 
 - name: Wait for MCP status
   include_role:
@@ -30,10 +37,11 @@
     resource_to_check: "MachineConfigPool"
     check_wait_retries: 60
     check_wait_delay: 60
-    check_reason: "ICSP update in mirror-rh-nfv"
+    check_reason: "Image Source update in mirror-rh-nfv"
 
-- name: Delete ImageContentSorucePolicy file
+- name: Delete Image Source file
   file:
-    path: "{{ mc_icsp_file.path }}"
+    path: "{{ mc_is_file.path }}"
     state: absent
-  when: mc_icsp_file is defined
+  when: mc_is_file is defined
+
