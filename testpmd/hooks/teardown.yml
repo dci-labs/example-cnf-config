@@ -1,26 +1,58 @@
 ---
-- name: Delete TRexConfig CR
-  k8s:
+- name: "Get a list of Subscriptions in {{ cnf_namespace }} namespace"
+  community.kubernetes.k8s_info:
+    api_version: operators.coreos.com/v1alpha1
+    kind: Subscription
     namespace: "{{ cnf_namespace }}"
-    kind: TRexConfig
-    name: "{{ trex_cr_name }}"
-    state: absent
+  register: sub_list
 
-- name: Delete TRexApp CR
-  k8s:
+- name: "Delete Subscriptions in {{ cnf_namespace }} namespace"
+  community.kubernetes.k8s:
+    api_version: operators.coreos.com/v1alpha1
+    kind: Subscription
     namespace: "{{ cnf_namespace }}"
-    kind: TRexApp
-    name: "{{ trex_app_cr_name }}"
     state: absent
+    name: "{{ item.metadata.name }}"
+  with_items: "{{ sub_list.resources }}"
+  ignore_errors: yes
 
-- name: Check for deletion of TRex server pods
-  k8s_info:
+- name: "Get a list of ClusterServiceVersions in {{ cnf_namespace }} namespace"
+  community.kubernetes.k8s_info:
+    api_version: operators.coreos.com/v1alpha1
+    kind: ClusterServiceVersion
     namespace: "{{ cnf_namespace }}"
-    kind: Pod
-    label_selectors:
-      - example-cnf-type=pkt-gen
-  register: trex_result
-  retries: 30
-  delay: 5
-  until: "trex_result.resources|length == 0"
+  register: csv_list
+
+- name: "Delete ClusterServiceVersions in {{ cnf_namespace }} namespace"
+  community.kubernetes.k8s:
+    api_version: operators.coreos.com/v1alpha1
+    kind: ClusterServiceVersion
+    namespace: "{{ cnf_namespace }}"
+    state: absent
+    name: "{{ item.metadata.name }}"
+  with_items: "{{ csv_list.resources }}"
+  ignore_errors: yes
+
+- name: "Delete all resources within the namespace {{ cnf_namespace }}"
+  shell: >
+    {{ oc_tool_path }} delete all --all -n {{ cnf_namespace }}
+  ignore_errors: yes
+
+- name: "Delete the namespace {{ cnf_namespace }}"
+  community.kubernetes.k8s:
+    name: "{{ cnf_namespace }}"
+    api_version: v1
+    kind: Namespace
+    state: absent
+  ignore_errors: yes
+
+- name: "Wait until namespace {{ cnf_namespace }} is deleted"
+  community.kubernetes.k8s_info:
+    api_version: v1
+    kind: Namespace
+    name: "{{ cnf_namespace }}"
+  register: stuck_namespace
+  until: stuck_namespace.resources | length == 0
+  retries: 6
+  delay: 10
 ...
