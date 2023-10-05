@@ -15,7 +15,7 @@
 
 - name: Mirror images in the catalog
   include_role:
-    name: mirror-catalog
+    name: mirror_catalog
   vars:
     mc_oc_tool_path: "{{ oc_tool_path }}"
     mc_catalog: "{{ example_cnf_index_image }}"
@@ -32,7 +32,7 @@
 
 - name: Wait for MCP status
   include_role:
-    name: check-resource
+    name: check_resource
   vars:
     resource_to_check: "MachineConfigPool"
     check_wait_retries: 60
