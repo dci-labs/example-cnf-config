@@ -1,7 +1,7 @@
 ---
 - name: Mirror catalog image
   include_role:
-    name: mirror_images
+    name: redhatci.ocp.mirror_images
   vars:
     authfile: "{{ pullsecret_tmp_file }}"
     images:
@@ -15,7 +15,7 @@
 
 - name: Mirror images in the catalog
   include_role:
-    name: mirror_catalog
+    name: redhatci.ocp.mirror_catalog
   vars:
     mc_oc_tool_path: "{{ oc_tool_path }}"
     mc_catalog: "{{ example_cnf_index_image }}"
@@ -32,7 +32,7 @@
 
 - name: Wait for MCP status
   include_role:
-    name: check_resource
+    name: redhatci.ocp.check_resource
   vars:
     resource_to_check: "MachineConfigPool"
     check_wait_retries: 60
