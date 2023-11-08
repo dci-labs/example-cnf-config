@@ -7,7 +7,7 @@
 
 - name: Select High performance RuntimeClass
   set_fact:
-    perf_runtime: "{{ rclass | json_query(query)}}"
+    runtime_class: "{{ rclass | json_query(query) | first }}"
   vars:
     query: "resources[?handler=='high-performance'].metadata.name"
   when: rclass|length > 0
@@ -18,7 +18,7 @@
   include_role:
     name: "{{ deploy_dir }}/roles/example-cnf-app"
   vars:
-    high_perf_runtime: "{{ perf_runtime }}"
+    high_perf_runtime: "{{ runtime_class }}"
 
 # if replica = 1, recommended not to set maxUnavailable to 0 or 0% and minAvailable to 100% for upgrades
 # https://github.com/operator-framework/operator-lifecycle-manager/blob/master/doc/design/adding-pod-disruption-budgets.md#limitations-on-pod-disruption-budgets
