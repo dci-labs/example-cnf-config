@@ -1,4 +1,10 @@
 ---
+- name: Check that cnf_namespace is defined
+  assert:
+    that:
+      - cnf_namespace is defined
+    fail_msg: "Please make sure cnf_namespace variable is defined to run the teardown"
+
 - name: "Get a list of Subscriptions in {{ cnf_namespace }} namespace"
   community.kubernetes.k8s_info:
     api_version: operators.coreos.com/v1alpha1
