@@ -139,7 +139,7 @@
 #      - "0000:d8:00.0"
 #    nodeselector: '"node.openshift.io/nic_type": "intel810"'
 - name: Create SriovNetworkNodePolicy
-  k8s:
+  community.kubernetes.k8s:
     definition: "{{ lookup('template', 'templates/sriov-policy.yml.j2') }}"
   loop: "{{ sriov_network }}"
   loop_control:
@@ -148,7 +148,7 @@
   tags: [sriov]
 
 - name: Create SriovNetwork
-  k8s:
+  community.kubernetes.k8s:
     definition: "{{ lookup('template', 'templates/sriov-network.yml.j2') }}"
   loop: "{{ sriov_network }}"
   loop_control:
