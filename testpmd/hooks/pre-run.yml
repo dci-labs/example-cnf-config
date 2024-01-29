@@ -115,87 +115,11 @@
   set_fact:
     ns_list: "{{ ns_list|default([]) + [ cnf_namespace ] }}"
 
-# Expecting variables in an array on this form
-# sriov_network:
-#  - name: intel-numa0-net1
-#    vlan: 460
-#    policy: intel-numa0-policy1
-#    resource: intel_numa0_res1
-#    numvfs: 16
-#    mtu: 9000
-#    device_type: vfio-pci
-#    devices:
-#      - ens2f1#0-15
-# or
-#  - policy: intel-dpdk-node-policy
-#    resource: intelnics
-#    numvfs: 4
-#    vendor: 8086
-#    deviceid: 1592
-#    devices:
-#      - ens4f0
-#    rootdevices:
-#      - "0000:d8:00.0"
-#    nodeselector: '"node.openshift.io/nic_type": "intel810"'
-- name: Create SriovNetworkNodePolicy
-  community.kubernetes.k8s:
-    definition: "{{ lookup('template', 'templates/sriov-policy.yml.j2') }}"
-  loop: "{{ sriov_network }}"
-  loop_control:
-    loop_var: sriov
-  when: sriov_network is defined
-  tags: [sriov]
-
-- name: Create SriovNetwork
-  community.kubernetes.k8s:
-    definition: "{{ lookup('template', 'templates/sriov-network.yml.j2') }}"
-  loop: "{{ sriov_network }}"
-  loop_control:
-    loop_var: sriov
-  when: sriov_network is defined
-  tags: [sriov]
-
-# SR-IOV operator reports networks to be well-created,
-# but then it takes several minutes
-# to see them allocatable on the worker nodes.
-# OCPBUGS created in case of issues (OCP 4.12/13/14) - https://issues.redhat.com/browse/OCPBUGS-13278
-# Workaround included in check-resource common role in dci-openshift-agent for the moment
-- name: Ensure that SR-IOV networks are allocatable on the nodes
-  tags: [sriov]
-  block:
-    - name: Wait to have all networks allocatable on worker nodes
-      include_role:
-        name: "{{ dci_config_dir }}/hooks/roles/sriov-networks"
-  rescue:
-    - name: SR-IOV must-gather in the case of failure
-      shell: >
-        bash {{ dci_config_dir }}/hooks/files/collect-sriov-operator-data.sh | tee {{ job_logs.path }}/collect-sriov-operator-data-rescue.txt
-      ignore_errors: true
-
-    - name: Wait for MCP status
-      include_role:
-        name: redhatci.ocp.check_resource
-      vars:
-        resource_to_check: "MachineConfigPool"
-        check_wait_retries: 60
-        check_wait_delay: 60
-        check_reason: "Rescue after SR-IOV installation"
-
-    - name: Delete all pods sriov-network-config-daemon-XXXXX
-      shell: >
-        {{ oc_tool_path }} get pods -n openshift-sriov-network-operator --no-headers=true |
-        awk '/sriov-network-config-daemon/{print $1}' |
-        xargs {{ oc_tool_path }} delete -n openshift-sriov-network-operator pod
-
-    - name: Wait again to have all networks allocatable on worker nodes
-      include_role:
-        name: "{{ dci_config_dir }}/hooks/roles/sriov-networks"
-
-- name: SR-IOV must-gather
-  tags: [sriov]
-  script: "{{ dci_config_dir }}/hooks/files/collect-sriov-operator-data.sh {{ oc_tool_path }} | tee {{ job_logs.path }}/collect-sriov-operator-data.txt"
-  ignore_errors: true
-  no_log: true
+- name: Create SRIOV Policies and networks
+  ansible.builtin.include_role:
+    name: redhatci.ocp.sriov_config
+  vars:
+    sriov_config_file: "{{ example_cnf_sriov_file }}"
 
 - name: "Install required rpm packages"
   package:
