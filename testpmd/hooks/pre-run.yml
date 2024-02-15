@@ -115,6 +115,11 @@
   set_fact:
     ns_list: "{{ ns_list|default([]) + [ cnf_namespace ] }}"
 
+- name: Create ResourceQuotas for namespace
+  community.kubernetes.k8s:
+    state: present
+    definition: "{{ lookup('template', 'templates/resource_quota.yml.j2') | from_yaml }}"
+
 - name: Create SRIOV Policies and networks
   ansible.builtin.include_role:
     name: redhatci.ocp.sriov_config
