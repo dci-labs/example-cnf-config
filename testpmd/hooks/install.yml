@@ -7,7 +7,7 @@
 
 - name: Select High performance RuntimeClass
   set_fact:
-    high_perf_runtime: "{{ rclass | json_query(query)}}"
+    perf_runtime: "{{ rclass | json_query(query)}}"
   vars:
     query: "resources[?handler=='high-performance'].metadata.name"
   when: rclass|length > 0
@@ -17,6 +17,8 @@
     trex_tests_skip_failures: "{{ example_cnf_skip_trex_job_failure | default(false) | bool }}"
   include_role:
     name: "{{ deploy_dir }}/roles/example-cnf-app"
+  vars:
+    high_perf_runtime: "{{ perf_runtime }}"
 
 # if replica = 1, recommended not to set maxUnavailable to 0 or 0% and minAvailable to 100% for upgrades
 # https://github.com/operator-framework/operator-lifecycle-manager/blob/master/doc/design/adding-pod-disruption-budgets.md#limitations-on-pod-disruption-budgets
@@ -30,6 +32,8 @@
 - name: Apply configuration for CNF Cert Suite execution
   include_role:
     name: "{{ dci_config_dir }}/hooks/roles/apply-cnf-cert-config"
+  vars:
+    high_perf_runtime: "{{ perf_runtime }}"
   when: do_cnf_cert|default(false)|bool
 
 ...
