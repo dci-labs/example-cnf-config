@@ -31,32 +31,4 @@
     loop_var: pod
   when: pod.metadata.name|regex_search(exclude_connectivity_regexp)
 
-# if replica = 1, recommended not to set maxUnavailable to 0 or 0% and minAvailable to 100%
-# https://github.com/operator-framework/operator-lifecycle-manager/blob/master/doc/design/adding-pod-disruption-budgets.md#limitations-on-pod-disruption-budgets
-- name: Create PodDisruptionBudget for controller-manager pods
-  community.kubernetes.k8s:
-    definition:
-      apiVersion: v1
-      kind: List
-      items:
-        - apiVersion: policy/v1
-          kind: PodDisruptionBudget
-          metadata:
-            name: controller-manager-pdb-min
-            namespace: "{{ app_ns }}"
-          spec:
-            minAvailable: 0
-            selector:
-              matchLabels:
-                control-plane: controller-manager
-        - apiVersion: policy/v1
-          kind: PodDisruptionBudget
-          metadata:
-            name: controller-manager-pdb-max
-            namespace: "{{ app_ns }}"
-          spec:
-            maxUnavailable: 1
-            selector:
-              matchLabels:
-                control-plane: controller-manager
 ...

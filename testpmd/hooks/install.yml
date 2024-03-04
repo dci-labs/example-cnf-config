@@ -4,6 +4,15 @@
   include_role:
     name: "{{ deploy_dir }}/roles/example-cnf-app"
 
+# if replica = 1, recommended not to set maxUnavailable to 0 or 0% and minAvailable to 100% for upgrades
+# https://github.com/operator-framework/operator-lifecycle-manager/blob/master/doc/design/adding-pod-disruption-budgets.md#limitations-on-pod-disruption-budgets
+# TODO (in a new patch): update PDB during upgrades to avoid issues during node draining, something like:
+# https://medium.com/@tamber/solution-avoid-kubernetes-openshift-node-drain-failure-due-to-active-poddisruptionbudget-df68efed2c4f
+- name: Create PodDisruptionBudget for controller-manager pods
+  community.kubernetes.k8s:
+    state: present
+    definition: "{{ lookup('template', 'templates/pdb.yml.j2') | from_yaml }}"
+
 - name: Apply configuration for CNF Cert Suite execution
   include_role:
     name: "{{ dci_config_dir }}/hooks/roles/apply-cnf-cert-config"
