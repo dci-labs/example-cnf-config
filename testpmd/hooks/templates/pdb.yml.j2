@@ -2,22 +2,22 @@ apiVersion: v1
 kind: List
 items:
 - apiVersion: policy/v1
-    kind: PodDisruptionBudget
-    metadata:
+  kind: PodDisruptionBudget
+  metadata:
     name: controller-manager-pdb-min
     namespace: {{ cnf_namespace }}
-    spec:
+  spec:
     minAvailable: 1
     selector:
-        matchLabels:
+      matchLabels:
         control-plane: controller-manager
 - apiVersion: policy/v1
-    kind: PodDisruptionBudget
-    metadata:
+  kind: PodDisruptionBudget
+  metadata:
     name: controller-manager-pdb-max
     namespace: {{ cnf_namespace }}
-    spec:
+  spec:
     maxUnavailable: 0
     selector:
-        matchLabels:
+      matchLabels:
         control-plane: controller-manager
