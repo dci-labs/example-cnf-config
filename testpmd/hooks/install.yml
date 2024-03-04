@@ -7,7 +7,7 @@
 
 - name: Select High performance RuntimeClass
   set_fact:
-    high_perf_runtime: "{{ rclass | json_query(query)}}"
+    perf_runtime: "{{ rclass | json_query(query)}}"
   vars:
     query: "resources[?handler=='high-performance'].metadata.name"
   when: rclass|length > 0
