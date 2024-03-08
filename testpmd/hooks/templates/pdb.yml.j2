@@ -7,7 +7,7 @@ items:
     name: controller-manager-pdb-min
     namespace: {{ cnf_namespace }}
   spec:
-    minAvailable: 1
+    minAvailable: 0
     selector:
       matchLabels:
         control-plane: controller-manager
@@ -17,7 +17,7 @@ items:
     name: controller-manager-pdb-max
     namespace: {{ cnf_namespace }}
   spec:
-    maxUnavailable: 0
+    maxUnavailable: 1
     selector:
       matchLabels:
         control-plane: controller-manager
