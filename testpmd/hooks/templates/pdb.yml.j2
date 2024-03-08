@@ -11,13 +11,3 @@ items:
     selector:
       matchLabels:
         control-plane: controller-manager
-- apiVersion: policy/v1
-  kind: PodDisruptionBudget
-  metadata:
-    name: controller-manager-pdb-max
-    namespace: {{ cnf_namespace }}
-  spec:
-    maxUnavailable: 1
-    selector:
-      matchLabels:
-        control-plane: controller-manager
