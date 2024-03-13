@@ -73,30 +73,32 @@
     state: absent
 
 # Delete SRIOV resources
+- name: Load SRIOV-related variables
+  ansible.builtin.include_vars:
+    file: "{{ example_cnf_sriov_file }}"
+
 - name: Delete SriovNetwork
   community.kubernetes.k8s:
     api_version: sriovnetwork.openshift.io/v1
     kind: SriovNetwork
-    name: "{{ sriov['name'] }}"
+    name: "{{ sriov_network.name }}"
     namespace: openshift-sriov-network-operator
     state: absent
-  loop: "{{ sriov_network }}"
+  loop: "{{ sriov_network_configs | json_query('[*].network') | select('defined') | list }}"
   loop_control:
-    loop_var: sriov
-  when: sriov_network is defined
+    loop_var: sriov_network
   tags: [sriov]
 
 - name: Delete SriovNetworkNodePolicy
   community.kubernetes.k8s:
     api_version: sriovnetwork.openshift.io/v1
     kind: SriovNetworkNodePolicy
-    name: "{{ sriov['policy'] }}"
+    name: "{{ sriov_node_policy.name }}"
     namespace: openshift-sriov-network-operator
     state: absent
-  loop: "{{ sriov_network }}"
+  loop: "{{ sriov_network_configs | json_query('[*].node_policy') | select('defined') | list }}"
   loop_control:
-    loop_var: sriov
-  when: sriov_network is defined
+    loop_var: sriov_node_policy
   tags: [sriov]
 
 ...
