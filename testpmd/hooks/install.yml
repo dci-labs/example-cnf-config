@@ -26,12 +26,11 @@
   community.kubernetes.k8s:
     state: present
     definition: "{{ lookup('template', 'templates/pdb.yml.j2') | from_yaml }}"
+    high_perf_runtime: "{{ runtime_class | default('') }}"
 
 - name: Apply configuration for CNF Cert Suite execution
   include_role:
     name: "{{ dci_config_dir }}/hooks/roles/apply-cnf-cert-config"
-  vars:
-    high_perf_runtime: "{{ perf_runtime }}"
   when: do_cnf_cert|default(false)|bool
 
 ...
