@@ -23,6 +23,27 @@
     - "'resources' in default_events"
     - default_events.resources | length
 
+- name: "find running T-REX pods"
+  community.kubernetes.k8s_info:
+    kind: Pod
+    namespace: "{{ dci_openshift_app_ns|default('example-cnf') }}"
+    label_selectors:
+      - example-cnf-type=pkt-gen
+    field_selectors:
+      - status.phase=Running
+  register: trex_pods
+  retries: 3
+  delay: 10
+
+- name: "Sending SIGTERM to TREX running pods"
+  shell: >
+    set -o pipefail &&
+    oc exec -it pod/{{ item.metadata.name }} -n {{ dci_openshift_app_ns|default('example-cnf') }} -- kill 1
+  loop: "{{ trex_pods.resources }}"
+  when:
+    - "'resources' in trex_pods"
+    - trex_pods.resources | length
+
 - name: "Validation after the upgrade"
   include_role:
     name: "{{ cnf_tmp_dir.path }}/nfv-example-cnf-deploy/roles/example-cnf-validate"
