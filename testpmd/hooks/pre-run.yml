@@ -119,6 +119,85 @@
   set_fact:
     ns_list: "{{ ns_list|default([]) + [ cnf_namespace ] }}"
 
+- name: Set the CNF mandatory network policies
+  community.kubernetes.k8s:
+    state: present
+    definition:
+      apiVersion: v1
+      kind: List
+      items:
+        - apiVersion: networking.k8s.io/v1
+          kind: NetworkPolicy
+          metadata:
+            name: default-deny-egress-testpmd-operator
+            namespace: "{{ cnf_namespace }}"
+          spec:
+            podSelector: {}
+            policyTypes:
+              - Egress
+        - apiVersion: networking.k8s.io/v1
+          kind: NetworkPolicy
+          metadata:
+            name: default-deny-ingress-testpmd-operator
+            namespace: "{{ cnf_namespace }}"
+          spec:
+            podSelector: {}
+            policyTypes:
+              - Ingress
+        - apiVersion: networking.k8s.io/v1
+          kind: NetworkPolicy
+          metadata:
+            name: intra-namespace-testpmd-operator
+            namespace: "{{ cnf_namespace }}"
+          spec:
+            podSelector: {}
+            ingress:
+              - from:
+                  - namespaceSelector:
+                      matchLabels:
+                        kubernetes.io/metadata.name: "{{ cnf_namespace }}"
+            egress:
+              - to:
+                  - namespaceSelector:
+                      matchLabels:
+                        kubernetes.io/metadata.name: "{{ cnf_namespace }}"
+        - apiVersion: networking.k8s.io/v1
+          kind: NetworkPolicy
+          metadata:
+            name: to-openshift-dns-testpmd-operator
+            namespace: "{{ cnf_namespace }}"
+          spec:
+            podSelector: {}
+            egress:
+              - to:
+                  - namespaceSelector:
+                      matchLabels:
+                        kubernetes.io/metadata.name: openshift-dns
+        - apiVersion: networking.k8s.io/v1
+          kind: NetworkPolicy
+          metadata:
+            name: from-openshift-dns-testpmd-operator
+            namespace: "{{ cnf_namespace }}"
+          spec:
+            podSelector: {}
+            ingress:
+              - from:
+                  - namespaceSelector:
+                      matchLabels:
+                        kubernetes.io/metadata.name: openshift-dns
+        - apiVersion: networking.k8s.io/v1
+          kind: NetworkPolicy
+          metadata:
+            name: from-openshift-dns-testpmd-operator
+            namespace: "{{ cnf_namespace }}"
+          spec:
+            podSelector: {}
+            ingress:
+              - ports:
+                  - protocol: TCP
+                    port: 6789
+
+
 - name: Create ResourceQuotas for namespace
   community.kubernetes.k8s:
     state: present
