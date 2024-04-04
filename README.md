@@ -55,3 +55,8 @@ TBD
 ### Upgrade validation
 When run during an upgrade, an extra DCI hook can be called to gather information about the CNF behavior.
 See [upgrade validation doc](upgrade_validation/README.md).
+
+### Launch a new TRex job
+
+If you want to launch a new TRex job on an already deployed example-cnf instance, use the launch_trex_job hook.
+See [launch_trex_job docs](launch_trex_job/README.md) for more details.

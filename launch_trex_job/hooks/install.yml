@@ -1,0 +1,33 @@
+---
+- name: Select event from the default TRex profile
+  community.kubernetes.k8s_info:
+    api_version: v1
+    kind: Event
+    namespace: "{{ cnf_namespace }}"
+    field_selectors:
+      - "involvedObject.name={{ trex_app_first_cr }}"
+  register: default_events
+
+- name: Remove events from the default TRex profile
+  community.kubernetes.k8s:
+    api_version: v1
+    kind: Event
+    state: absent
+    namespace: "{{ cnf_namespace }}"
+    wait: yes
+    name: "{{ event.metadata.name }}"
+  loop: "{{ default_events.resources }}"
+  loop_control:
+    loop_var: event
+  when:
+    - "'resources' in default_events"
+    - default_events.resources | length
+
+# Job logs are retrieved in the example-cnf-app role from nfv-example-cnf-deploy
+- name: Run a new TRex job
+  vars:
+    trex_app_cr_name: "trex-app-new"
+    trex_app_version: "{{ trex_app_v }}"
+  include_role:
+    name: "{{ cnf_tmp_dir.path }}/nfv-example-cnf-deploy/roles/example-cnf-app"
+    tasks_from: retry-trex.yaml
