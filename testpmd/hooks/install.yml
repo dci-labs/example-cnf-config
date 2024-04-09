@@ -4,6 +4,10 @@
   include_role:
     name: "{{ deploy_dir }}/roles/example-cnf-app"
 
+- name: Retrieve output from example-cnf-app role
+  set_fact:
+    trex_app_passed: "{{ trex_app_run_passed | default(false) | bool}}"
+
 # if replica = 1, recommended not to set maxUnavailable to 0 or 0% and minAvailable to 100% for upgrades
 # https://github.com/operator-framework/operator-lifecycle-manager/blob/master/doc/design/adding-pod-disruption-budgets.md#limitations-on-pod-disruption-budgets
 # TODO (in a new patch): update PDB during upgrades to avoid issues during node draining, something like:

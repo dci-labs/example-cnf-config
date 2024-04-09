@@ -1,9 +1,11 @@
 ---
+# Migration test cannot be run if the TRex app job did not pass
 - name: Run migration test
   include_role:
     name: "{{ deploy_dir }}/roles/example-cnf-validate"
   when:
     - run_migration_test|default(true)|bool
+    - trex_app_passed|default(false)|bool
 
 - name: Checking found CalalogSource with opcap
   include_role:
