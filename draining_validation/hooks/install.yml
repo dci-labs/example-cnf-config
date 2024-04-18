@@ -1,0 +1,9 @@
+---
+- name: "Perform node draining process"
+  vars:
+    trex_app_cr_name: "{{ trex_app_cr_name_to_check|default('trex-app-new') }}"
+  include_role:
+    name: "{{ cnf_tmp_dir.path }}/nfv-example-cnf-deploy/roles/example-cnf-draining"
+    apply:
+      environment:
+        KUBECONFIG: "{{ kubeconfig_path }}"
