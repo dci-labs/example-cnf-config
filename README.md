@@ -56,6 +56,9 @@ TBD
 When run during an upgrade, an extra DCI hook can be called to gather information about the CNF behavior.
 See [upgrade validation doc](upgrade_validation/README.md).
 
+### Node draining validation
+If example-cnf is launched in continuous mode (or emulating continuous mode with a long TRex job duration), we can use [draining validation](draining_validation/README.md) to emulate a node draining process that impacts in the worker node where testpmd pod is deployed, then it needs to be reallocated, and consequently packet loss starts to appear.
+
 ### Launch a new TRex job
 
 If you want to launch a new TRex job on an already deployed example-cnf instance, use the launch_trex_job hook.

@@ -26,7 +26,7 @@
 # Job logs are retrieved in the example-cnf-app role from nfv-example-cnf-deploy
 - name: Run a new TRex job
   vars:
-    trex_app_cr_name: "trex-app-new"
+    trex_app_cr_name: "{{ trex_app_new_cr_name|default('trex-app-new') }}"
     trex_app_version: "{{ trex_app_v }}"
   include_role:
     name: "{{ cnf_tmp_dir.path }}/nfv-example-cnf-deploy/roles/example-cnf-app"
