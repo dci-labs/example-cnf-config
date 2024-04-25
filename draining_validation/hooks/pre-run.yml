@@ -1,4 +1,8 @@
 ---
+- name: debug
+  debug:
+    msg: "this is a debug task"
+
 - name: Create example-cnf facts
   set_fact:
     cnf_namespace: "example-cnf"
