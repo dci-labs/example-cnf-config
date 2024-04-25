@@ -1,10 +1,24 @@
 ---
+- name: Get all RuntimeClass
+  community.kubernetes.k8s_info:
+    api_version: node.k8s.io/v1
+    kind: RuntimeClass
+  register: rclass
+
+- name: Select High performance RuntimeClass
+  set_fact:
+    runtime_class: "{{ rclass | json_query(query) | first }}"
+  vars:
+    query: "resources[?handler=='high-performance'].metadata.name"
+  when: rclass|length > 0
 
 - name: Deploy the Example CNF applications
   vars:
     trex_tests_skip_failures: "{{ example_cnf_skip_trex_job_failure | default(false) | bool }}"
   include_role:
     name: "{{ deploy_dir }}/roles/example-cnf-app"
+  vars:
+    high_perf_runtime: "{{ runtime_class | default('') }}"
 
 # if replica = 1, recommended not to set maxUnavailable to 0 or 0% and minAvailable to 100% for upgrades
 # https://github.com/operator-framework/operator-lifecycle-manager/blob/master/doc/design/adding-pod-disruption-budgets.md#limitations-on-pod-disruption-budgets
