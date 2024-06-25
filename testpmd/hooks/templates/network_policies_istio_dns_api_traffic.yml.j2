@@ -69,3 +69,37 @@
                   - namespaceSelector:
                       matchLabels:
                         kubernetes.io/metadata.name: openshift-dns
+        - kind: NetworkPolicy
+          apiVersion: networking.k8s.io/v1
+          metadata:
+            name: allow-apiserver-ingress
+            namespace: "{{ cnf_namespace }}"
+          spec:
+            podSelector: {}
+            ingress:
+              - from:
+                  - namespaceSelector:
+                      matchLabels:
+                        kubernetes.io/metadata.name: openshift-apiserver
+            egress:
+              - to:
+                  - namespaceSelector:
+                      matchLabels:
+                        kubernetes.io/metadata.name: "{{ cnf_namespace }}"
+        - kind: NetworkPolicy
+          apiVersion: networking.k8s.io/v1
+          metadata:
+            name: allow-apiserver-egress
+            namespace: "{{ cnf_namespace }}"
+          spec:
+            podSelector: {}
+            ingress:
+              - from:
+                  - namespaceSelector:
+                      matchLabels:
+                        kubernetes.io/metadata.name: "{{ cnf_namespace }}"
+            egress:
+              - to:
+                  - namespaceSelector:
+                      matchLabels:
+                        kubernetes.io/metadata.name: openshift-apiserver
