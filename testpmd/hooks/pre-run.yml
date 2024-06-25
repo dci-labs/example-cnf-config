@@ -128,6 +128,7 @@
     - "example-cnf-type=cnf-app"
     - "example-cnf-type=pkt-gen"
     - "example-cnf-type=pkt-gen-app"
+    - "control-plane=controller-manager"
   loop_control:
     loop_var: label
 
