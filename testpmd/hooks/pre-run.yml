@@ -135,7 +135,7 @@
 - name: Set network policies for openshift DNS and Istio
   community.kubernetes.k8s:
     state: present
-    definition: "{{ lookup('template', 'templates/network_policies_am_traffic.yml.j2') | from_yaml }}"
+    definition: "{{ lookup('template', 'templates/network_policies_istio_dns_api_traffic.yml.j2') | from_yaml }}"
 
 - name: Create ResourceQuotas for namespace
   community.kubernetes.k8s:
