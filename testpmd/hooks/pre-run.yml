@@ -129,25 +129,105 @@
         - apiVersion: networking.k8s.io/v1
           kind: NetworkPolicy
           metadata:
-            name: default-deny-egress-testpmd-operator
+            name: default-deny-egress-{{ label|regex_replace('=', '-') }}
             namespace: "{{ cnf_namespace }}"
           spec:
-            podSelector: {}
+            podSelector:
+              matchLabels:
+                "{{ label|regex_replace('=', ': ') }}"
             policyTypes:
               - Egress
         - apiVersion: networking.k8s.io/v1
           kind: NetworkPolicy
           metadata:
-            name: default-deny-ingress-testpmd-operator
+            name: default-deny-ingress-{{ label|regex_replace('=', '-') }}
             namespace: "{{ cnf_namespace }}"
           spec:
-            podSelector: {}
+            podSelector:
+              matchLabels:
+                "{{ label|regex_replace('=', ': ') }}"
             policyTypes:
               - Ingress
         - apiVersion: networking.k8s.io/v1
           kind: NetworkPolicy
           metadata:
-            name: intra-namespace-testpmd-operator
+            name: allow-intra-namespace-{{ label|regex_replace('=', '-') }}
+            namespace: "{{ cnf_namespace }}"
+          spec:
+            podSelector: {}
+            podSelector:
+              matchLabels:
+                "{{ label|regex_replace('=', ': ') }}"
+            ingress:
+              - from:
+                  - namespaceSelector:
+                      matchLabels:
+                        kubernetes.io/metadata.name: "{{ cnf_namespace }}"
+            egress:
+              - to:
+                  - namespaceSelector:
+                      matchLabels:
+                        kubernetes.io/metadata.name: "{{ cnf_namespace }}"
+  loop:
+    - "example-cnf-type=lb-app"
+    - "example-cnf-type=cnf-app"
+    - "example-cnf-type=pkt-gen"
+    - "example-cnf-type=pkt-gen-app"
+  loop_control:
+    loop_var: label
+
+- name: Set network policies for openshift DNS and Istio
+  community.kubernetes.k8s:
+    state: present
+    definition:
+      apiVersion: v1
+      kind: List
+      items:
+        - apiVersion: networking.k8s.io/v1
+          kind: NetworkPolicy
+          metadata:
+            name: to-openshift-dns
+            namespace: "{{ cnf_namespace }}"
+          spec:
+            podSelector: {}
+            egress:
+              - to:
+                  - namespaceSelector:
+                      matchLabels:
+                        kubernetes.io/metadata.name: openshift-dns
+        - apiVersion: networking.k8s.io/v1
+          kind: NetworkPolicy
+          metadata:
+            name: from-openshift-dns
+            namespace: "{{ cnf_namespace }}"
+          spec:
+            podSelector: {}
+            ingress:
+              - from:
+                  - namespaceSelector:
+                      matchLabels:
+                        kubernetes.io/metadata.name: openshift-dns
+        - kind: NetworkPolicy
+          apiVersion: networking.k8s.io/v1
+          metadata:
+            name: allow-istio-ingress
+            namespace: "{{ cnf_namespace }}"
+          spec:
+            podSelector: {}
+            ingress:
+              - from:
+                  - namespaceSelector:
+                      matchLabels:
+                        kubernetes.io/metadata.name: istio-system
+            egress:
+              - to:
+                  - namespaceSelector:
+                      matchLabels:
+                        kubernetes.io/metadata.name: "{{ cnf_namespace }}"
+        - kind: NetworkPolicy
+          apiVersion: networking.k8s.io/v1
+          metadata:
+            name: allow-istio-egress
             namespace: "{{ cnf_namespace }}"
           spec:
             podSelector: {}
@@ -160,23 +240,11 @@
               - to:
                   - namespaceSelector:
                       matchLabels:
-                        kubernetes.io/metadata.name: "{{ cnf_namespace }}"
-        - apiVersion: networking.k8s.io/v1
-          kind: NetworkPolicy
+                        kubernetes.io/metadata.name: istio-system
+        - kind: NetworkPolicy
+          apiVersion: networking.k8s.io/v1
           metadata:
-            name: to-openshift-dns-testpmd-operator
-            namespace: "{{ cnf_namespace }}"
-          spec:
-            podSelector: {}
-            egress:
-              - to:
-                  - namespaceSelector:
-                      matchLabels:
-                        kubernetes.io/metadata.name: openshift-dns
-        - apiVersion: networking.k8s.io/v1
-          kind: NetworkPolicy
-          metadata:
-            name: from-openshift-dns-testpmd-operator
+            name: allow-dns-ingress
             namespace: "{{ cnf_namespace }}"
           spec:
             podSelector: {}
@@ -185,17 +253,28 @@
                   - namespaceSelector:
                       matchLabels:
                         kubernetes.io/metadata.name: openshift-dns
-        - apiVersion: networking.k8s.io/v1
-          kind: NetworkPolicy
+            egress:
+              - to:
+                  - namespaceSelector:
+                      matchLabels:
+                        kubernetes.io/metadata.name: "{{ cnf_namespace }}"
+        - kind: NetworkPolicy
+          apiVersion: networking.k8s.io/v1
           metadata:
-            name: from-openshift-dns-testpmd-operator
+            name: allow-dns-egress
             namespace: "{{ cnf_namespace }}"
           spec:
             podSelector: {}
             ingress:
-              - ports:
-                  - protocol: TCP
-                    port: 6789
+              - from:
+                  - namespaceSelector:
+                      matchLabels:
+                        kubernetes.io/metadata.name: "{{ cnf_namespace }}"
+            egress:
+              - to:
+                  - namespaceSelector:
+                      matchLabels:
+                        kubernetes.io/metadata.name: openshift-dns
 
 
 - name: Create ResourceQuotas for namespace
