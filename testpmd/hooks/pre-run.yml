@@ -119,6 +119,24 @@
   set_fact:
     ns_list: "{{ ns_list|default([]) + [ cnf_namespace ] }}"
 
+- name: Set the CNF mandatory network policies
+  community.kubernetes.k8s:
+    state: present
+    definition: "{{ lookup('template', 'templates/network_policies_cnf_traffic.yml.j2') | from_yaml }}"
+  loop:
+    - "example-cnf-type=lb-app"
+    - "example-cnf-type=cnf-app"
+    - "example-cnf-type=pkt-gen"
+    - "example-cnf-type=pkt-gen-app"
+    - "control-plane=controller-manager"
+  loop_control:
+    loop_var: label
+
+- name: Set network policies for openshift DNS, API and Istio
+  community.kubernetes.k8s:
+    state: present
+    definition: "{{ lookup('template', 'templates/network_policies_istio_dns_api_traffic.yml.j2') | from_yaml }}"
+
 - name: Create ResourceQuotas for namespace
   community.kubernetes.k8s:
     state: present
