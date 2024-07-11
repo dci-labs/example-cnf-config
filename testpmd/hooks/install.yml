@@ -15,10 +15,11 @@
 - name: Deploy the Example CNF applications
   vars:
     trex_tests_skip_failures: "{{ example_cnf_skip_trex_job_failure | default(false) | bool }}"
-  include_role:
-    name: "{{ deploy_dir }}/roles/example-cnf-app"
-  vars:
+    ecd_action: "deploy"
     high_perf_runtime: "{{ runtime_class | default('') }}"
+    ecd_operator_version: "{{ operator_version }}"
+  include_role:
+    name: redhatci.ocp.example_cnf_deploy
 
 # if replica = 1, recommended not to set maxUnavailable to 0 or 0% and minAvailable to 100% for upgrades
 # https://github.com/operator-framework/operator-lifecycle-manager/blob/master/doc/design/adding-pod-disruption-budgets.md#limitations-on-pod-disruption-budgets

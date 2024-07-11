@@ -8,13 +8,3 @@
     state: directory
     prefix: example-cnf-draining.
   register: cnf_tmp_dir
-
-- name: "Checkout Example CNF deployment role"
-  git:
-    repo: "https://github.com/rh-nfv-int/nfv-example-cnf-deploy.git"
-    dest: "{{ cnf_tmp_dir.path }}/nfv-example-cnf-deploy"
-    version: "{{ example_cnf_deploy_script_version|default('master') }}"
-    update: yes
-  register: gitresult
-
-- debug: msg="Git hash is {{ gitresult.after }}"
