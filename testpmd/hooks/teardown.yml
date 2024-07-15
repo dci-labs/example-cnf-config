@@ -100,5 +100,9 @@
   loop_control:
     loop_var: sriov_node_policy
   tags: [sriov]
+  retries: 6
+  delay: 10
+  register: node_policy_retry
+  until: node_policy_retry.error is not defined
 
 ...
