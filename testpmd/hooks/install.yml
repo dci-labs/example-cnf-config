@@ -29,9 +29,9 @@
     state: present
     definition: "{{ lookup('template', 'templates/pdb.yml.j2') | from_yaml }}"
 
-- name: Apply configuration for CNF Cert Suite execution
+- name: Apply configuration for certsuite execution
   include_role:
-    name: "{{ dci_config_dir }}/hooks/roles/apply-cnf-cert-config"
-  when: do_cnf_cert|default(false)|bool
+    name: "{{ dci_config_dir }}/hooks/roles/apply-certsuite-config"
+  when: do_certsuite|default(false)|bool
 
 ...
