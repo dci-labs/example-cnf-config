@@ -5,7 +5,7 @@ items:
   kind: PodDisruptionBudget
   metadata:
     name: controller-manager-pdb-min
-    namespace: {{ cnf_namespace }}
+    namespace: {{ ecd_cnf_namespace }}
   spec:
     minAvailable: 0
     selector:

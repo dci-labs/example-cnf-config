@@ -109,7 +109,7 @@
       apiVersion: v1
       kind: Namespace
       metadata:
-        name: "{{ cnf_namespace }}"
+        name: "{{ ecd_cnf_namespace }}"
         labels:
           security.openshift.io/scc.podSecurityLabelSync: "false"
           pod-security.kubernetes.io/enforce: "privileged"
@@ -117,7 +117,7 @@
 
 - name: "Add CNF Namespace to the list of NS to get logs from"
   set_fact:
-    ns_list: "{{ ns_list|default([]) + [ cnf_namespace ] }}"
+    ns_list: "{{ ns_list|default([]) + [ ecd_cnf_namespace ] }}"
 
 - name: Set the CNF mandatory network policies
   community.kubernetes.k8s:
