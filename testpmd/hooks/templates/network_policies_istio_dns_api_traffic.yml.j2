@@ -5,7 +5,7 @@
           apiVersion: networking.k8s.io/v1
           metadata:
             name: allow-istio-ingress
-            namespace: "{{ cnf_namespace }}"
+            namespace: "{{ ecd_cnf_namespace }}"
           spec:
             podSelector: {}
             ingress:
@@ -17,19 +17,19 @@
               - to:
                   - namespaceSelector:
                       matchLabels:
-                        kubernetes.io/metadata.name: "{{ cnf_namespace }}"
+                        kubernetes.io/metadata.name: "{{ ecd_cnf_namespace }}"
         - kind: NetworkPolicy
           apiVersion: networking.k8s.io/v1
           metadata:
             name: allow-istio-egress
-            namespace: "{{ cnf_namespace }}"
+            namespace: "{{ ecd_cnf_namespace }}"
           spec:
             podSelector: {}
             ingress:
               - from:
                   - namespaceSelector:
                       matchLabels:
-                        kubernetes.io/metadata.name: "{{ cnf_namespace }}"
+                        kubernetes.io/metadata.name: "{{ ecd_cnf_namespace }}"
             egress:
               - to:
                   - namespaceSelector:
@@ -39,7 +39,7 @@
           apiVersion: networking.k8s.io/v1
           metadata:
             name: allow-dns-ingress
-            namespace: "{{ cnf_namespace }}"
+            namespace: "{{ ecd_cnf_namespace }}"
           spec:
             podSelector: {}
             ingress:
@@ -51,19 +51,19 @@
               - to:
                   - namespaceSelector:
                       matchLabels:
-                        kubernetes.io/metadata.name: "{{ cnf_namespace }}"
+                        kubernetes.io/metadata.name: "{{ ecd_cnf_namespace }}"
         - kind: NetworkPolicy
           apiVersion: networking.k8s.io/v1
           metadata:
             name: allow-dns-egress
-            namespace: "{{ cnf_namespace }}"
+            namespace: "{{ ecd_cnf_namespace }}"
           spec:
             podSelector: {}
             ingress:
               - from:
                   - namespaceSelector:
                       matchLabels:
-                        kubernetes.io/metadata.name: "{{ cnf_namespace }}"
+                        kubernetes.io/metadata.name: "{{ ecd_cnf_namespace }}"
             egress:
               - to:
                   - namespaceSelector:
@@ -73,7 +73,7 @@
           apiVersion: networking.k8s.io/v1
           metadata:
             name: allow-apiserver-egress
-            namespace: "{{ cnf_namespace }}"
+            namespace: "{{ ecd_cnf_namespace }}"
           spec:
             podSelector: {}
             egress:

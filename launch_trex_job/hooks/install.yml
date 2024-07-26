@@ -3,7 +3,7 @@
   community.kubernetes.k8s_info:
     api_version: v1
     kind: Event
-    namespace: "{{ cnf_namespace }}"
+    namespace: "{{ ecd_cnf_namespace }}"
     field_selectors:
       - "involvedObject.name={{ trex_app_first_cr }}"
   register: default_events
@@ -13,7 +13,7 @@
     api_version: v1
     kind: Event
     state: absent
-    namespace: "{{ cnf_namespace }}"
+    namespace: "{{ ecd_cnf_namespace }}"
     wait: yes
     name: "{{ event.metadata.name }}"
   loop: "{{ default_events.resources }}"
