@@ -3,9 +3,10 @@
   include_role:
     name: redhatci.ocp.mirror_images
   vars:
-    authfile: "{{ pullsecret_tmp_file }}"
-    images:
+    mi_authfile: "{{ pullsecret_tmp_file }}"
+    mi_images:
       - "{{ example_cnf_index_image }}"
+    mi_registry: "{{ dci_local_registry }}"
 
 - name: Find ImageDigestMirrorSet in the cluster
   community.kubernetes.k8s_info:
