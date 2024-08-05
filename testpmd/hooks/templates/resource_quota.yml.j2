@@ -5,7 +5,7 @@ items:
     kind: ResourceQuota
     metadata:
       name: pods-high
-      namespace: {{ cnf_namespace }}
+      namespace: {{ ecd_cnf_namespace }}
     spec:
       hard:
         cpu: "100"
@@ -20,7 +20,7 @@ items:
     kind: ResourceQuota
     metadata:
       name: pods-medium
-      namespace: {{ cnf_namespace }}
+      namespace: {{ ecd_cnf_namespace }}
     spec:
       hard:
         cpu: "10"
@@ -35,7 +35,7 @@ items:
     kind: ResourceQuota
     metadata:
       name: pods-low
-      namespace: {{ cnf_namespace }}
+      namespace: {{ ecd_cnf_namespace }}
     spec:
       hard:
         cpu: "5"

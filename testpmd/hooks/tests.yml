@@ -2,8 +2,9 @@
 - name: Run migration test
   vars:
     trex_tests_skip_failures: "{{ example_cnf_skip_trex_job_failure | default(false) | bool }}"
+    ecd_action: "validate"
   include_role:
-    name: "{{ deploy_dir }}/roles/example-cnf-validate"
+    name: redhatci.ocp.example_cnf_deploy
   when:
     - run_migration_test|default(true)|bool
 

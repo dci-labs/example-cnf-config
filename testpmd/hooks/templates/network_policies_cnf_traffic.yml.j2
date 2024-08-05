@@ -5,7 +5,7 @@ items:
     kind: NetworkPolicy
     metadata:
       name: default-deny-egress-{{ label|regex_replace('=', '-') }}
-      namespace: "{{ cnf_namespace }}"
+      namespace: "{{ ecd_cnf_namespace }}"
     spec:
       podSelector:
         matchLabels:
@@ -16,7 +16,7 @@ items:
     kind: NetworkPolicy
     metadata:
       name: default-deny-ingress-{{ label|regex_replace('=', '-') }}
-      namespace: "{{ cnf_namespace }}"
+      namespace: "{{ ecd_cnf_namespace }}"
     spec:
       podSelector:
         matchLabels:
@@ -27,7 +27,7 @@ items:
     kind: NetworkPolicy
     metadata:
       name: allow-intra-namespace-{{ label|regex_replace('=', '-') }}
-      namespace: "{{ cnf_namespace }}"
+      namespace: "{{ ecd_cnf_namespace }}"
     spec:
       podSelector:
         matchLabels:
@@ -36,9 +36,9 @@ items:
         - from:
             - namespaceSelector:
                 matchLabels:
-                  kubernetes.io/metadata.name: "{{ cnf_namespace }}"
+                  kubernetes.io/metadata.name: "{{ ecd_cnf_namespace }}"
       egress:
         - to:
             - namespaceSelector:
                 matchLabels:
-                  kubernetes.io/metadata.name: "{{ cnf_namespace }}"
+                  kubernetes.io/metadata.name: "{{ ecd_cnf_namespace }}"
