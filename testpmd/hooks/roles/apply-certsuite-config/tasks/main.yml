@@ -11,8 +11,7 @@
     namespace: "{{ app_ns }}"
   register: example_cnf_pod_list
 
-# Labels are included after deploying the pods. However, as stated here:
-# https://github.com/test-network-function/cnf-certification-test#targetpodlabels
+# Labels are included after deploying the pods. However, as stated in the certsuite docs:
 # "It's highly recommended that the labels should be defined in pod definition rather 
 # than added after pod is created"
 - name: "Tag pods with autodiscovery labels related to exclude connectivity features in test suites"
@@ -24,8 +23,8 @@
         name: "{{ pod.metadata.name }}"
         namespace: "{{ app_ns }}"
         labels:
-          test-network-function.com/skip_connectivity_tests: "true"
-          test-network-function.com/skip_multus_connectivity_tests: "true"
+          redhat-best-practices-for-k8s.com/skip_connectivity_tests: "true"
+          redhat-best-practices-for-k8s.com/skip_multus_connectivity_tests: "true"
   loop: "{{ example_cnf_pod_list.resources }}"
   loop_control:
     loop_var: pod
