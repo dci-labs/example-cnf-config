@@ -68,7 +68,7 @@
   community.kubernetes.k8s:
     api_version: operators.coreos.com/v1alpha1
     kind: CatalogSource
-    name: "{{ catalog_name | default('nfv-example-cnf-catalog') }}"
+    name: "{{ ecd_catalog_name | default('nfv-example-cnf-catalog') }}"
     namespace: openshift-marketplace
     state: absent
 

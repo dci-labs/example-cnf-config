@@ -55,16 +55,6 @@
             state: absent
 
       when: examplecnf_change_dir.stat.exists and examplecnf_change_dir.stat.isdir
-
-    - name: Check if nfv-example-cnf-deploy is part of the change
-      stat:
-        path: "{{ dci_change_dir }}/nfv-example-cnf-deploy"
-      register: deploy_change_dir
-
-    - name: Override the deploy_dir variable
-      set_fact:
-        deploy_dir: "{{ dci_change_dir }}/nfv-example-cnf-deploy"
-      when: deploy_change_dir.stat.exists and deploy_change_dir.stat.isdir
   when:
     - dci_change_dir is defined
 
@@ -165,10 +155,10 @@
     - dci_disconnected | default(false) | bool
 
 - name: Deploy NFV Example CNF catalog
-  include_role:
-    name: redhatci.ocp.example_cnf_deploy
   vars:
     ecd_action: "catalog"
     ecd_operator_version: "{{ operator_version }}"
+  include_role:
+    name: redhatci.ocp.example_cnf_deploy
 
 ...

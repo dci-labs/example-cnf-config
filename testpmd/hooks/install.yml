@@ -12,12 +12,16 @@
     query: "resources[?handler=='high-performance'].metadata.name"
   when: rclass|length > 0
 
+## AQUIII
 - name: Deploy the Example CNF applications
   vars:
-    trex_tests_skip_failures: "{{ example_cnf_skip_trex_job_failure | default(false) | bool }}"
     ecd_action: "deploy"
-    high_perf_runtime: "{{ runtime_class | default('') }}"
     ecd_operator_version: "{{ operator_version }}"
+    ecd_opm_path: "{{ opm_tool_path }}"
+    ecd_oc_path: "{{ oc_tool_path }}"
+    ecd_high_perf_runtime: "{{ runtime_class | default('') }}"
+    ecd_trex_tests_skip_failures: "{{ example_cnf_skip_trex_job_failure | default(false) | bool }}"
+    ecd_job_logs_path: "{{ job_logs.path }}"
   include_role:
     name: redhatci.ocp.example_cnf_deploy
 
