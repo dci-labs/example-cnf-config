@@ -1,7 +1,0 @@
----
-- name: "Deleting temporal files"
-  file:
-    state: "absent"
-    path: "{{ cnf_tmp_dir.path }}"
-  when:
-    - cnf_tmp_dir is defined

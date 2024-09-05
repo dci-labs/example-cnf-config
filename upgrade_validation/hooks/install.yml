@@ -24,9 +24,12 @@
     - default_events.resources | length
 
 - name: "Validation after the upgrade"
+  vars:
+    ecd_action: "validate"
+    ecd_oc_path: "{{ oc_tool_path }}"
+    ecd_job_logs_path: "{{ job_logs.path }}"
   include_role:
-    name: "{{ cnf_tmp_dir.path }}/nfv-example-cnf-deploy/roles/example-cnf-validate"
-    tasks_from: validate.yml
+    name: redhatci.ocp.example_cnf_deploy
 
 - name: "run k8s info on jobs"
   community.kubernetes.k8s_info:

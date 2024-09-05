@@ -3,19 +3,3 @@
   set_fact:
     ecd_cnf_namespace: "example-cnf"
     trex_app_first_cr: "{{ trex_app_cr_name | default('trex-app')}}"
-
-- name: "Create leading directories"
-  tempfile:
-    state: directory
-    prefix: example-cnf-validation.
-  register: cnf_tmp_dir
-
-- name: "Checkout Example CNF deployment role"
-  git:
-    repo: "https://github.com/rh-nfv-int/nfv-example-cnf-deploy.git"
-    dest: "{{ cnf_tmp_dir.path }}/nfv-example-cnf-deploy"
-    version: "{{ example_cnf_deploy_script_version|default('master') }}"
-    update: yes
-  register: gitresult
-
-- debug: msg="Git hash is {{ gitresult.after }}"
