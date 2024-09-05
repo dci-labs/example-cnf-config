@@ -1,10 +1,9 @@
 ---
 - name: "Perform node draining process"
   vars:
-    trex_app_cr_name: "{{ trex_app_cr_name_to_check|default('trex-app-new') }}"
     ecd_action: "draining"
+    ecd_trex_app_cr_name: "{{ trex_app_cr_name_to_check|default('trex-app-new') }}"
+    ecd_oc_path: "{{ oc_tool_path }}"
+    ecd_job_logs_path: "{{ job_logs.path }}"
   include_role:
     name: redhatci.ocp.example_cnf_deploy
-    apply:
-      environment:
-        KUBECONFIG: "{{ kubeconfig_path }}"

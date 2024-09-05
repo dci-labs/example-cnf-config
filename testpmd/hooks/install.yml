@@ -12,7 +12,6 @@
     query: "resources[?handler=='high-performance'].metadata.name"
   when: rclass|length > 0
 
-## AQUIII
 - name: Deploy the Example CNF applications
   vars:
     ecd_action: "deploy"

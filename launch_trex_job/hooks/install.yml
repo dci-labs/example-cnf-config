@@ -23,11 +23,13 @@
     - "'resources' in default_events"
     - default_events.resources | length
 
-# Job logs are retrieved in the example-cnf-app role from nfv-example-cnf-deploy
+# Job logs are retrieved in the example_cnf_deploy role from redhatci.ocp collection
 - name: Run a new TRex job
   vars:
-    trex_app_cr_name: "{{ trex_app_new_cr_name|default('trex-app-new') }}"
-    trex_app_version: "{{ trex_app_v }}"
+    ecd_action: "deploy_extra_trex"
+    ecd_trex_app_cr_name: "{{ trex_app_new_cr_name|default('trex-app-new') }}"
+    ecd_trex_app_version: "{{ trex_app_v }}"
+    ecd_oc_path: "{{ oc_tool_path }}"
+    ecd_job_logs_path: "{{ job_logs.path }}"
   include_role:
-    name: "{{ cnf_tmp_dir.path }}/nfv-example-cnf-deploy/roles/example-cnf-app"
-    tasks_from: retry-trex.yaml
+    name: redhatci.ocp.example_cnf_deploy

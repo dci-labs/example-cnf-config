@@ -2,9 +2,3 @@
 - name: Create example-cnf facts
   set_fact:
     ecd_cnf_namespace: "example-cnf"
-
-- name: "Create leading directories"
-  tempfile:
-    state: directory
-    prefix: example-cnf-draining.
-  register: cnf_tmp_dir
