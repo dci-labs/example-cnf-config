@@ -4,7 +4,7 @@ This hook is expected to be run after an upgrade job, where the CNF app was runn
 
 This hook prepares and launches the validation tasks from example_cnf_deploy role from [redhatci.ocp collection](https://github.com/redhatci/ansible-collection-redhatci-ocp/blob/main/roles/example_cnf_deploy/README.md).
 
-To ensure the previous run of T-REX (usually the default CR) is not polluting the results, all the event from the previous CR are removed.
+To ensure the previous run of TRex (usually the default CR) is not polluting the results, all the event from the previous CR are removed.
 
 | Name             | Required | Default    | Description                                 |
 |------------------|----------|------------|---------------------------------------------|
@@ -12,4 +12,4 @@ To ensure the previous run of T-REX (usually the default CR) is not polluting th
 
 ## Continuous burst ending - WIP
 
-Covering the case where the T-REX profile duration has been set to '-1'
+Covering the case where the TRex profile duration has been set to '-1'. TBD.

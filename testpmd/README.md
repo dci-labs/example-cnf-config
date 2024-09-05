@@ -1,6 +1,6 @@
 # Testpmd
 
-This hook deploys all resources from example-cnf scenario, then launch TRex job to evaluate the packet loss ratio in the deployment made.
+This hook deploys all resources from example-cnf scenario, then launches TRex job to evaluate the packet loss ratio in the deployment made.
 
 Some variables than can be used for debugging purposes:
 
