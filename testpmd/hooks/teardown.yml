@@ -1,63 +1,63 @@
 ---
 # Delete resources deployed under example-cnf namespace
-- name: Check that cnf_namespace is defined
+- name: Check that ecd_cnf_namespace is defined
   assert:
     that:
-      - cnf_namespace is defined
-    fail_msg: "Please make sure cnf_namespace variable is defined to run the teardown"
+      - ecd_cnf_namespace is defined
+    fail_msg: "Please make sure ecd_cnf_namespace variable is defined to run the teardown"
 
-- name: "Get a list of Subscriptions in {{ cnf_namespace }} namespace"
+- name: "Get a list of Subscriptions in {{ ecd_cnf_namespace }} namespace"
   community.kubernetes.k8s_info:
     api_version: operators.coreos.com/v1alpha1
     kind: Subscription
-    namespace: "{{ cnf_namespace }}"
+    namespace: "{{ ecd_cnf_namespace }}"
   register: sub_list
 
-- name: "Delete Subscriptions in {{ cnf_namespace }} namespace"
+- name: "Delete Subscriptions in {{ ecd_cnf_namespace }} namespace"
   community.kubernetes.k8s:
     api_version: operators.coreos.com/v1alpha1
     kind: Subscription
-    namespace: "{{ cnf_namespace }}"
+    namespace: "{{ ecd_cnf_namespace }}"
     state: absent
     name: "{{ item.metadata.name }}"
   with_items: "{{ sub_list.resources }}"
   ignore_errors: yes
 
-- name: "Get a list of ClusterServiceVersions in {{ cnf_namespace }} namespace"
+- name: "Get a list of ClusterServiceVersions in {{ ecd_cnf_namespace }} namespace"
   community.kubernetes.k8s_info:
     api_version: operators.coreos.com/v1alpha1
     kind: ClusterServiceVersion
-    namespace: "{{ cnf_namespace }}"
+    namespace: "{{ ecd_cnf_namespace }}"
   register: csv_list
 
-- name: "Delete ClusterServiceVersions in {{ cnf_namespace }} namespace"
+- name: "Delete ClusterServiceVersions in {{ ecd_cnf_namespace }} namespace"
   community.kubernetes.k8s:
     api_version: operators.coreos.com/v1alpha1
     kind: ClusterServiceVersion
-    namespace: "{{ cnf_namespace }}"
+    namespace: "{{ ecd_cnf_namespace }}"
     state: absent
     name: "{{ item.metadata.name }}"
   with_items: "{{ csv_list.resources }}"
   ignore_errors: yes
 
-- name: "Delete all resources within the namespace {{ cnf_namespace }}"
+- name: "Delete all resources within the namespace {{ ecd_cnf_namespace }}"
   shell: >
-    {{ oc_tool_path }} delete all --all -n {{ cnf_namespace }}
+    {{ oc_tool_path }} delete all --all -n {{ ecd_cnf_namespace }}
   ignore_errors: yes
 
-- name: "Delete the namespace {{ cnf_namespace }}"
+- name: "Delete the namespace {{ ecd_cnf_namespace }}"
   community.kubernetes.k8s:
-    name: "{{ cnf_namespace }}"
+    name: "{{ ecd_cnf_namespace }}"
     api_version: v1
     kind: Namespace
     state: absent
   ignore_errors: yes
 
-- name: "Wait until namespace {{ cnf_namespace }} is deleted"
+- name: "Wait until namespace {{ ecd_cnf_namespace }} is deleted"
   community.kubernetes.k8s_info:
     api_version: v1
     kind: Namespace
-    name: "{{ cnf_namespace }}"
+    name: "{{ ecd_cnf_namespace }}"
   register: stuck_namespace
   until: stuck_namespace.resources | length == 0
   retries: 6
@@ -68,7 +68,7 @@
   community.kubernetes.k8s:
     api_version: operators.coreos.com/v1alpha1
     kind: CatalogSource
-    name: "{{ catalog_name | default('nfv-example-cnf-catalog') }}"
+    name: "{{ ecd_catalog_name | default('nfv-example-cnf-catalog') }}"
     namespace: openshift-marketplace
     state: absent
 

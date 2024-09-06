@@ -1,6 +1,6 @@
 # Testpmd
 
-This hook interacts with [nfv-example-cnf-deploy](https://github.com/rh-nfv-int/nfv-example-cnf-deploy) repository to deploy all resources from example-cnf scenario, then launch TRex job to evaluate the packet loss ratio in the deployment made.
+This hook deploys all resources from example-cnf scenario, then launches TRex job to evaluate the packet loss ratio in the deployment made.
 
 Some variables than can be used for debugging purposes:
 

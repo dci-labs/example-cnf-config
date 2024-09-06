@@ -3,7 +3,7 @@
   community.kubernetes.k8s_info:
     api_version: v1
     kind: Event
-    namespace: "{{ cnf_namespace }}"
+    namespace: "{{ ecd_cnf_namespace }}"
     field_selectors:
       - "involvedObject.name={{ trex_app_first_cr }}"
   register: default_events
@@ -13,7 +13,7 @@
     api_version: v1
     kind: Event
     state: absent
-    namespace: "{{ cnf_namespace }}"
+    namespace: "{{ ecd_cnf_namespace }}"
     wait: yes
     name: "{{ event.metadata.name }}"
   loop: "{{ default_events.resources }}"
@@ -24,14 +24,17 @@
     - default_events.resources | length
 
 - name: "Validation after the upgrade"
+  vars:
+    ecd_action: "validate"
+    ecd_oc_path: "{{ oc_tool_path }}"
+    ecd_job_logs_path: "{{ job_logs.path }}"
   include_role:
-    name: "{{ cnf_tmp_dir.path }}/nfv-example-cnf-deploy/roles/example-cnf-validate"
-    tasks_from: validate.yml
+    name: redhatci.ocp.example_cnf_deploy
 
 - name: "run k8s info on jobs"
   community.kubernetes.k8s_info:
     kind: Job
-    namespace: "{{ cnf_namespace }}"
+    namespace: "{{ ecd_cnf_namespace }}"
   register: job
   retries: 3
   delay: 10
@@ -42,7 +45,7 @@
 
 - name: "Retrieve logs from jobs"
   community.kubernetes.k8s_log:
-    namespace: "{{ cnf_namespace }}"
+    namespace: "{{ ecd_cnf_namespace }}"
     label_selectors:
       - job-name={{ job_name }}
   register: logs

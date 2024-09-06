@@ -1,13 +1,14 @@
 ---
 - name: Run migration test
   vars:
-    trex_tests_skip_failures: "{{ example_cnf_skip_trex_job_failure | default(false) | bool }}"
+    ecd_action: "validate"
+    ecd_trex_tests_skip_failures: "{{ example_cnf_skip_trex_job_failure | default(false) | bool }}"
   include_role:
-    name: "{{ deploy_dir }}/roles/example-cnf-validate"
+    name: redhatci.ocp.example_cnf_deploy
   when:
     - run_migration_test|default(true)|bool
 
-- name: Checking found CalalogSource with opcap
+- name: Checking found CatalogSource with opcap
   include_role:
     name: redhatci.ocp.opcap_tool
   vars:

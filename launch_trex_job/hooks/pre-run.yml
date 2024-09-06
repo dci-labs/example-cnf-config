@@ -1,7 +1,7 @@
 ---
 - name: Create example-cnf facts
   set_fact:
-    cnf_namespace: "example-cnf"
+    ecd_cnf_namespace: "example-cnf"
     trex_app_first_cr: "{{ trex_app_cr_name | default('trex-app')}}"
 
 - name: Get example-cnf component details from job.components
@@ -32,19 +32,3 @@
     trex_app_v: "{{ item }}"
   when: '"trex-container-app@" in item'
   loop: "{{ catalog_data_cmd.stdout_lines }}"
-
-- name: "Create leading directories"
-  tempfile:
-    state: directory
-    prefix: example-cnf-launch-trex-job.
-  register: cnf_tmp_dir
-
-- name: "Checkout Example CNF deployment role"
-  git:
-    repo: "https://github.com/rh-nfv-int/nfv-example-cnf-deploy.git"
-    dest: "{{ cnf_tmp_dir.path }}/nfv-example-cnf-deploy"
-    version: "{{ example_cnf_deploy_script_version|default('master') }}"
-    update: true
-  register: gitresult
-
-- debug: msg="Git hash is {{ gitresult.after }}"

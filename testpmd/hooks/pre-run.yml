@@ -2,17 +2,17 @@
 
 - name: Create example-cnf facts
   set_fact:
-    cnf_app_networks:
+    ecd_cnf_app_networks:
       - name: intel-numa0-net1
         count: 1
       - name: intel-numa0-net2
         count: 1
-    packet_generator_networks:
+    ecd_packet_generator_networks:
       - name: intel-numa0-net3
         count: 1
       - name: intel-numa0-net4
         count: 1
-    cnf_namespace: "example-cnf"
+    ecd_cnf_namespace: "example-cnf"
 
 - name: Get example-cnf component details from job.components
   set_fact:
@@ -55,16 +55,6 @@
             state: absent
 
       when: examplecnf_change_dir.stat.exists and examplecnf_change_dir.stat.isdir
-
-    - name: Check if nfv-example-cnf-deploy is part of the change
-      stat:
-        path: "{{ dci_change_dir }}/nfv-example-cnf-deploy"
-      register: deploy_change_dir
-
-    - name: Override the deploy_dir variable
-      set_fact:
-        deploy_dir: "{{ dci_change_dir }}/nfv-example-cnf-deploy"
-      when: deploy_change_dir.stat.exists and deploy_change_dir.stat.isdir
   when:
     - dci_change_dir is defined
 
@@ -109,7 +99,7 @@
       apiVersion: v1
       kind: Namespace
       metadata:
-        name: "{{ cnf_namespace }}"
+        name: "{{ ecd_cnf_namespace }}"
         labels:
           security.openshift.io/scc.podSecurityLabelSync: "false"
           pod-security.kubernetes.io/enforce: "privileged"
@@ -117,7 +107,7 @@
 
 - name: "Add CNF Namespace to the list of NS to get logs from"
   set_fact:
-    ns_list: "{{ ns_list|default([]) + [ cnf_namespace ] }}"
+    ns_list: "{{ ns_list|default([]) + [ ecd_cnf_namespace ] }}"
 
 - name: Set the CNF mandatory network policies
   community.kubernetes.k8s:
@@ -159,32 +149,16 @@
     state: latest
   become: true
 
-- block:
-    - name: Checkout Example CNF deployment roles
-      git:
-        repo: "https://github.com/rh-nfv-int/nfv-example-cnf-deploy.git"
-        dest: "{{ dci_config_dir }}/hooks/{{ cluster_name }}/nfv-example-cnf-deploy"
-        version: "{{ example_cnf_deploy_script_version|default('master') }}"
-        update: true
-      register: gitresult
-
-    - debug: msg="Git hash is {{ gitresult.after }}"
-
-    - name: Set the deploy_dir variable
-      set_fact:
-        deploy_dir: "{{ dci_config_dir }}/hooks/{{ cluster_name }}/nfv-example-cnf-deploy"
-
-  when:
-    - deploy_dir is not defined
-
-
 - name: Mirror catalog in disconnected environment
   include_tasks: mirror-catalog.yml
   when:
     - dci_disconnected | default(false) | bool
 
 - name: Deploy NFV Example CNF catalog
+  vars:
+    ecd_action: "catalog"
+    ecd_operator_version: "{{ operator_version }}"
   include_role:
-    name: "{{ deploy_dir }}/roles/example-cnf-catalog"
+    name: redhatci.ocp.example_cnf_deploy
 
 ...
