@@ -3,14 +3,14 @@
 - name: Create example-cnf facts
   set_fact:
     ecd_cnf_app_networks:
-      - name: intel-numa0-net1
+      - name: example-cnf-net1
         count: 1
-      - name: intel-numa0-net2
+      - name: example-cnf-net2
         count: 1
     ecd_packet_generator_networks:
-      - name: intel-numa0-net3
+      - name: example-cnf-net3
         count: 1
-      - name: intel-numa0-net4
+      - name: example-cnf-net4
         count: 1
     ecd_cnf_namespace: "example-cnf"
 
