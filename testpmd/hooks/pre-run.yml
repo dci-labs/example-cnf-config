@@ -2,15 +2,10 @@
 
 - name: Create example-cnf facts
   set_fact:
-    ecd_cnf_app_networks:
+    ecd_sriov_networks:
       - name: example-cnf-net1
         count: 1
       - name: example-cnf-net2
-        count: 1
-    ecd_packet_generator_networks:
-      - name: example-cnf-net3
-        count: 1
-      - name: example-cnf-net4
         count: 1
     ecd_cnf_namespace: "example-cnf"
 
@@ -117,7 +112,6 @@
     state: present
     definition: "{{ lookup('template', 'templates/network_policies_cnf_traffic.yml.j2') | from_yaml }}"
   loop:
-    - "example-cnf-type=lb-app"
     - "example-cnf-type=cnf-app"
     - "example-cnf-type=pkt-gen"
     - "example-cnf-type=pkt-gen-app"
