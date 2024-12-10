@@ -43,14 +43,11 @@
             operator_version: "{{ index_output.stdout }}"
             example_cnf_index_image: "quay.io/rh-nfv-int/nfv-example-cnf-catalog:{{ index_output.stdout }}"
 
-        # If running a test from BOS2, as the component belongs to telco-ci-partner team and not to DCI team,
-        # this task would fail because the component owner is a different one. Using ignore_errors for that case.
         - name: 'Remove component from the job'
           dci_job_component:
             component_id: "{{ operator_component_id }}"
             job_id: " {{ job_id }} "
             state: absent
-          ignore_errors: true
 
       when: examplecnf_change_dir.stat.exists and examplecnf_change_dir.stat.isdir
   when:
