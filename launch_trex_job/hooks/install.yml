@@ -1,6 +1,6 @@
 ---
 - name: Select event from the default TRex profile
-  community.kubernetes.k8s_info:
+  kubernetes.core.k8s_info:
     api_version: v1
     kind: Event
     namespace: "{{ ecd_cnf_namespace }}"
@@ -9,7 +9,7 @@
   register: default_events
 
 - name: Remove events from the default TRex profile
-  community.kubernetes.k8s:
+  kubernetes.core.k8s:
     api_version: v1
     kind: Event
     state: absent
