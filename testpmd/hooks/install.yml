@@ -1,6 +1,6 @@
 ---
 - name: Get all RuntimeClass
-  community.kubernetes.k8s_info:
+  kubernetes.core.k8s_info:
     api_version: node.k8s.io/v1
     kind: RuntimeClass
   register: rclass
@@ -29,7 +29,7 @@
 # TODO (in a new patch): update PDB during upgrades to avoid issues during node draining, something like:
 # https://medium.com/@tamber/solution-avoid-kubernetes-openshift-node-drain-failure-due-to-active-poddisruptionbudget-df68efed2c4f
 - name: Create PodDisruptionBudget for controller-manager pods
-  community.kubernetes.k8s:
+  kubernetes.core.k8s:
     state: present
     definition: "{{ lookup('template', 'templates/pdb.yml.j2') | from_yaml }}"
 

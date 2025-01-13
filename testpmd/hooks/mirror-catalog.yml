@@ -9,7 +9,7 @@
     mi_registry: "{{ dci_local_registry }}"
 
 - name: Find ImageDigestMirrorSet in the cluster
-  community.kubernetes.k8s_info:
+  kubernetes.core.k8s_info:
     api_version: config.openshift.io/v1
     kind: ImageDigestMirrorSet
   register: idms_res
@@ -28,7 +28,7 @@
     - pullsecret_tmp_file is defined
 
 - name: Apply Image Source file
-  community.kubernetes.k8s:
+  kubernetes.core.k8s:
     src: "{{ mc_is_file.path }}"
 
 - name: Wait for MCP status

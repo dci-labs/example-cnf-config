@@ -7,14 +7,14 @@
     fail_msg: "Please make sure ecd_cnf_namespace variable is defined to run the teardown"
 
 - name: "Get a list of Subscriptions in {{ ecd_cnf_namespace }} namespace"
-  community.kubernetes.k8s_info:
+  kubernetes.core.k8s_info:
     api_version: operators.coreos.com/v1alpha1
     kind: Subscription
     namespace: "{{ ecd_cnf_namespace }}"
   register: sub_list
 
 - name: "Delete Subscriptions in {{ ecd_cnf_namespace }} namespace"
-  community.kubernetes.k8s:
+  kubernetes.core.k8s:
     api_version: operators.coreos.com/v1alpha1
     kind: Subscription
     namespace: "{{ ecd_cnf_namespace }}"
@@ -24,14 +24,14 @@
   ignore_errors: yes
 
 - name: "Get a list of ClusterServiceVersions in {{ ecd_cnf_namespace }} namespace"
-  community.kubernetes.k8s_info:
+  kubernetes.core.k8s_info:
     api_version: operators.coreos.com/v1alpha1
     kind: ClusterServiceVersion
     namespace: "{{ ecd_cnf_namespace }}"
   register: csv_list
 
 - name: "Delete ClusterServiceVersions in {{ ecd_cnf_namespace }} namespace"
-  community.kubernetes.k8s:
+  kubernetes.core.k8s:
     api_version: operators.coreos.com/v1alpha1
     kind: ClusterServiceVersion
     namespace: "{{ ecd_cnf_namespace }}"
@@ -46,7 +46,7 @@
   ignore_errors: yes
 
 - name: "Delete the namespace {{ ecd_cnf_namespace }}"
-  community.kubernetes.k8s:
+  kubernetes.core.k8s:
     name: "{{ ecd_cnf_namespace }}"
     api_version: v1
     kind: Namespace
@@ -54,7 +54,7 @@
   ignore_errors: yes
 
 - name: "Wait until namespace {{ ecd_cnf_namespace }} is deleted"
-  community.kubernetes.k8s_info:
+  kubernetes.core.k8s_info:
     api_version: v1
     kind: Namespace
     name: "{{ ecd_cnf_namespace }}"
@@ -65,7 +65,7 @@
 
 # Delete example-cnf CatalogSource
 - name: Delete example-cnf CatalogSource
-  community.kubernetes.k8s:
+  kubernetes.core.k8s:
     api_version: operators.coreos.com/v1alpha1
     kind: CatalogSource
     name: "{{ ecd_catalog_name | default('nfv-example-cnf-catalog') }}"
@@ -78,7 +78,7 @@
     file: "{{ example_cnf_sriov_file }}"
 
 - name: Delete SriovNetwork
-  community.kubernetes.k8s:
+  kubernetes.core.k8s:
     api_version: sriovnetwork.openshift.io/v1
     kind: SriovNetwork
     name: "{{ sriov_network.name }}"
@@ -90,7 +90,7 @@
   tags: [sriov]
 
 - name: Delete SriovNetworkNodePolicy
-  community.kubernetes.k8s:
+  kubernetes.core.k8s:
     api_version: sriovnetwork.openshift.io/v1
     kind: SriovNetworkNodePolicy
     name: "{{ sriov_node_policy.name }}"

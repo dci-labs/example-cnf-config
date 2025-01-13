@@ -5,7 +5,7 @@
 # in the pipeline
 
 - name: Get pods from example-cnf namespace
-  community.kubernetes.k8s_info:
+  kubernetes.core.k8s_info:
     api_version: v1
     kind: Pod
     namespace: "{{ app_ns }}"
@@ -15,7 +15,7 @@
 # "It's highly recommended that the labels should be defined in pod definition rather 
 # than added after pod is created"
 - name: "Tag pods with autodiscovery labels related to exclude connectivity features in test suites"
-  community.kubernetes.k8s:
+  kubernetes.core.k8s:
     definition:
       apiVersion: v1
       kind: Pod
