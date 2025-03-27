@@ -18,7 +18,7 @@
       set -e -o pipefail;
       {{ opm_tool_path }} render
       {{ catalog_image }} |
-      jq -r '.relatedImages[].image'
+      jq -rn 'inputs | select(.schema == "olm.bundle").relatedImages[].image'
   args:
     executable: /bin/bash
   register: catalog_data_cmd
