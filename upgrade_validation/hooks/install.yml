@@ -26,6 +26,7 @@
 - name: "Validation after the upgrade"
   vars:
     ecd_action: "validate"
+    ecd_cnfapp_name: "{{ example_cnf_cnfapp_name }}"
     ecd_oc_path: "{{ oc_tool_path }}"
     ecd_job_logs_path: "{{ job_logs.path }}"
   include_role:
