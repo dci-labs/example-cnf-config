@@ -27,6 +27,7 @@
 - name: Run a new TRex job
   vars:
     ecd_action: "deploy_extra_trex"
+    ecd_cnfapp_name: "{{ example_cnf_cnfapp_name }}"
     ecd_trex_app_cr_name: "{{ trex_app_new_cr_name|default('trex-app-new') }}"
     ecd_trex_app_version: "{{ trex_app_v }}"
     ecd_oc_path: "{{ oc_tool_path }}"

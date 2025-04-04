@@ -2,3 +2,4 @@
 - name: Create example-cnf facts
   set_fact:
     ecd_cnf_namespace: "example-cnf"
+    example_cnf_cnfapp_name: "testpmd"
