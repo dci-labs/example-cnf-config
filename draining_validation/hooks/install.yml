@@ -2,6 +2,7 @@
 - name: "Perform node draining process"
   vars:
     ecd_action: "draining"
+    ecd_cnfapp_name: "{{ example_cnf_cnfapp_name }}"
     ecd_trex_app_cr_name: "{{ trex_app_cr_name_to_check|default('trex-app-new') }}"
     ecd_oc_path: "{{ oc_tool_path }}"
     ecd_job_logs_path: "{{ job_logs.path }}"
