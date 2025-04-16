@@ -1,4 +1,13 @@
 ---
+- name: Define CNFApp
+  set_fact:
+    example_cnf_cnfapp_name: grout
+  when: example_cnf_cnfapp_name is not defined
+
+- name: Fail if the CNFApp to be used is not under the allowed ones
+  fail:
+    msg: "The example_cnf_cnfapp_name you have selected is not either grout or testpmd"
+  when: example_cnf_cnfapp_name not in ['grout', 'testpmd']
 
 - name: Create example-cnf facts
   set_fact:

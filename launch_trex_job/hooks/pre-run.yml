@@ -3,6 +3,7 @@
   set_fact:
     ecd_cnf_namespace: "example-cnf"
     trex_app_first_cr: "{{ trex_app_cr_name | default('trex-app')}}"
+    example_cnf_cnfapp_name: "testpmd"
 
 - name: Get example-cnf component details from job.components
   set_fact:

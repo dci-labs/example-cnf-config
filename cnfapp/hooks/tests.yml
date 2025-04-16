@@ -2,6 +2,7 @@
 - name: Run migration test
   vars:
     ecd_action: "validate"
+    ecd_cnfapp_name: "{{ example_cnf_cnfapp_name }}"
     ecd_trex_tests_skip_failures: "{{ example_cnf_skip_trex_job_failure | default(false) | bool }}"
   include_role:
     name: redhatci.ocp.example_cnf_deploy
