@@ -57,7 +57,7 @@
             component_id: "{{ operator_component_id }}"
             job_id: " {{ job_id }} "
             state: absent
-
+          delegate_to: localhost
       when: examplecnf_change_dir.stat.exists and examplecnf_change_dir.stat.isdir
   when:
     - dci_change_dir is defined
