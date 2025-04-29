@@ -11,3 +11,5 @@ Some variables than can be used for debugging purposes:
 | example_cnf_cnfapp_name           | No       | grout      | CNFApp to be used. Could be "grout" or "testpmd"                                                      |
 | example_cnf_skip_trex_job_failure | No       | false      | If true, do not fail the job if TRex job fails                                                        |
 | example_cnf_network_config_file   | No       | ''         | Path to find the network config file to provide IP-MAC config to TRex and CNFApp (required for Grout) |
+| run_migration_test                | No       | true       | Enable migration tests |
+| run_opcap_check                   | No       | true       | Enable opcap check |
