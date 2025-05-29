@@ -135,11 +135,30 @@
     state: present
     definition: "{{ lookup('template', 'templates/resource_quota.yml.j2') | from_yaml }}"
 
+- name: Create SriovNetworkPoolConfig to enable RDMA exclusive mode
+  kubernetes.core.k8s:
+    state: present
+    definition:
+      apiVersion: sriovnetwork.openshift.io/v1
+      kind: SriovNetworkPoolConfig
+      metadata:
+        name: worker
+        namespace: openshift-sriov-network-operator
+      spec:
+        maxUnavailable: 1
+        nodeSelector:
+          matchLabels:
+            node-role.kubernetes.io/worker: ""
+        rdmaMode: exclusive
+  tags: [sriov]
+  when: example_cnf_enable_rdma_exclusive | default(false) | bool
+
 - name: Create SRIOV Policies and networks
-  ansible.builtin.include_role:
-    name: redhatci.ocp.sriov_config
   vars:
     sriov_config_file: "{{ example_cnf_sriov_file }}"
+  ansible.builtin.include_role:
+    name: redhatci.ocp.sriov_config
+  tags: [sriov]
 
 - name: "Install required rpm packages"
   package:

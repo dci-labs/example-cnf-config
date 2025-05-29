@@ -105,4 +105,14 @@
   register: node_policy_retry
   until: node_policy_retry.error is not defined
 
+- name: Delete SriovNetworkPoolConfig
+  kubernetes.core.k8s:
+    api_version: sriovnetwork.openshift.io/v1
+    kind: SriovNetworkPoolConfig
+    name: worker
+    namespace: openshift-sriov-network-operator
+    state: absent
+  tags: [sriov]
+  when: example_cnf_enable_rdma_exclusive | default(false) | bool
+
 ...
