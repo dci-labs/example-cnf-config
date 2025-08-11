@@ -4,13 +4,13 @@
     ecd_action: "validate"
     ecd_cnfapp_name: "{{ example_cnf_cnfapp_name }}"
     ecd_trex_tests_skip_failures: "{{ example_cnf_skip_trex_job_failure | default(false) | bool }}"
-  include_role:
+  ansible.builtin.include_role:
     name: redhatci.ocp.example_cnf_deploy
   when:
     - run_migration_test|default(true)|bool
 
 - name: Checking found CatalogSource with opcap
-  include_role:
+  ansible.builtin.include_role:
     name: redhatci.ocp.opcap_tool
   vars:
     opcap_target_catalog_source: "nfv-example-cnf-catalog"

@@ -8,7 +8,8 @@ To ensure the previous run of TRex (usually the default CR) is not polluting the
 
 Some variables than can be used for debugging purposes:
 
-| Name                              | Required | Default    | Description                                      |
-|-----------------------------------|----------|------------|--------------------------------------------------|
-| trex_app_cr_name                  | Yes      | 'trex-app' | Name of the initial CR that will be cleaned      |
-| example_cnf_cnfapp_name           | No       | testpmd    | CNFApp to be used. Only "testpmd" can be used    |
+| Name                              | Required | Default      | Description                                      |
+|-----------------------------------|----------|--------------|--------------------------------------------------|
+| trex_app_cr_name                  | Yes      | 'trex-app'   | Name of the initial CR that will be cleaned      |
+| example_cnf_cnfapp_name           | No       | testpmd      | CNFApp to be used. Only "testpmd" can be used    |
+| trex_app_new_cr_name              | No       | trex-app-new | Name of the TRexApp CR to create                 |

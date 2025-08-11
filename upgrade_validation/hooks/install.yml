@@ -29,7 +29,7 @@
     ecd_cnfapp_name: "{{ example_cnf_cnfapp_name }}"
     ecd_oc_path: "{{ oc_tool_path }}"
     ecd_job_logs_path: "{{ job_logs.path }}"
-  include_role:
+  ansible.builtin.include_role:
     name: redhatci.ocp.example_cnf_deploy
 
 - name: "run k8s info on jobs"
@@ -41,7 +41,7 @@
   delay: 10
 
 - name: "Set list of job names"
-  set_fact:
+  ansible.builtin.set_fact:
       list: "{{ job | json_query('resources[*].metadata.name')}}"
 
 - name: "Retrieve logs from jobs"
@@ -56,7 +56,7 @@
     loop_var: job_name
 
 - name: Store logs when jobs_logs is defined
-  copy:
+  ansible.builtin.copy:
     content: "{{ job_out.log }}"
     dest: "{{ job_logs.path }}/{{ job_out.job_name}}.log"
   ignore_errors: true

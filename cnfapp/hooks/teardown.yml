@@ -1,10 +1,11 @@
 ---
 # Delete resources deployed under example-cnf namespace
-- name: Check that ecd_cnf_namespace is defined
-  assert:
+- name: Check that required variables are defined
+  ansible.builtin.assert:
     that:
       - ecd_cnf_namespace is defined
-    fail_msg: "Please make sure ecd_cnf_namespace variable is defined to run the teardown"
+      - example_cnf_sriov_file is defined
+    fail_msg: "Please make sure ecd_cnf_namespace and example_cnf_sriov_file variables are defined to run the teardown"
 
 - name: "Get a list of Subscriptions in {{ ecd_cnf_namespace }} namespace"
   kubernetes.core.k8s_info:
@@ -41,7 +42,7 @@
   ignore_errors: yes
 
 - name: "Delete all resources within the namespace {{ ecd_cnf_namespace }}"
-  shell: >
+  ansible.builtin.shell: >
     {{ oc_tool_path }} delete all --all -n {{ ecd_cnf_namespace }}
   ignore_errors: yes
 
