@@ -10,6 +10,7 @@ For this to work, some requirements need to be met:
 
 Some variables than can be used for debugging purposes:
 
-| Name                              | Required | Default    | Description                                      |
-|-----------------------------------|----------|------------|--------------------------------------------------|
-| example_cnf_cnfapp_name           | No       | testpmd    | CNFApp to be used. Only "testpmd" can be used    |
+| Name                              | Required | Default      | Description                                      |
+|-----------------------------------|----------|..------------|--------------------------------------------------|
+| example_cnf_cnfapp_name           | No       | testpmd      | CNFApp to be used. Only "testpmd" can be used    |
+| trex_app_cr_name_to_check         | No       | trex-app-new | Name of the TRexApp CR to create                |

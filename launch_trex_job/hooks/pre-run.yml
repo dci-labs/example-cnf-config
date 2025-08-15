@@ -1,12 +1,12 @@
 ---
 - name: Create example-cnf facts
-  set_fact:
+  ansible.builtin.set_fact:
     ecd_cnf_namespace: "example-cnf"
     trex_app_first_cr: "{{ trex_app_cr_name | default('trex-app')}}"
     example_cnf_cnfapp_name: "testpmd"
 
 - name: Get example-cnf component details from job.components
-  set_fact:
+  ansible.builtin.set_fact:
     operator_version: "{{ item['version'] }}"
   with_items: "{{ hostvars.localhost.job_info.job.components }}"
   when: item["type"] == "nfv-example-cnf-index"
@@ -29,7 +29,7 @@
     - catalog_data_cmd.rc == 0
 
 - name: Set trex_app_v from the catalog
-  set_fact:
+  ansible.builtin.set_fact:
     trex_app_v: "{{ item }}"
   when: '"trex-container-app@" in item'
   loop: "{{ catalog_data_cmd.stdout_lines }}"

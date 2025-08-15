@@ -1,16 +1,21 @@
 ---
+- name: Fail if no SRIOV config file is provided
+  ansible.builtin.fail:
+    msg: "The example_cnf_sriov_file is not defined"
+  when: example_cnf_sriov_file is not defined
+
 - name: Define CNFApp
-  set_fact:
+  ansible.builtin.set_fact:
     example_cnf_cnfapp_name: grout
   when: example_cnf_cnfapp_name is not defined
 
 - name: Fail if the CNFApp to be used is not under the allowed ones
-  fail:
+  ansible.builtin.fail:
     msg: "The example_cnf_cnfapp_name you have selected is not either grout or testpmd"
   when: example_cnf_cnfapp_name not in ['grout', 'testpmd']
 
 - name: Create example-cnf facts
-  set_fact:
+  ansible.builtin.set_fact:
     ecd_sriov_networks:
       - name: example-cnf-net1
         count: 1
@@ -19,7 +24,7 @@
     ecd_cnf_namespace: "example-cnf"
 
 - name: Get example-cnf component details from job.components
-  set_fact:
+  ansible.builtin.set_fact:
     operator_version: "{{ item['version'] }}"
     example_cnf_index_image: "{{ item['data']['url'] }}:{{ item['version'] }}"
     operator_component_id: "{{ item['id'] }}"
@@ -29,26 +34,26 @@
 - name: Check example-cnf change presence
   block:
     - name: Check if example-cnf is part of the change
-      stat:
+      ansible.builtin.stat:
         path: "{{ dci_change_dir }}/example-cnf"
       register: examplecnf_change_dir
 
     - block:
         - name: Generate versions
-          shell: 'JSON=$(ls ../example-cnf-[0-9]*.json); if [ -z "$JSON" ]; then JSON=../github.json; fi; ./generate-versions.sh {{ job_logs.path }}/versions.cfg pr$(jq -r .number $JSON).$(jq -r .head.sha $JSON|cut -c1-8)'
+          ansible.builtin.shell: 'JSON=$(ls ../example-cnf-[0-9]*.json); if [ -z "$JSON" ]; then JSON=../github.json; fi; ./generate-versions.sh {{ job_logs.path }}/versions.cfg pr$(jq -r .number $JSON).$(jq -r .head.sha $JSON|cut -c1-8)'
           args:
             executable: /bin/bash
             chdir: "{{ dci_change_dir }}/example-cnf"
 
         - name: Get index version
-          shell: ". {{ job_logs.path }}/versions.cfg && echo v${VERSIONS[nfv-example-cnf-index]}"
+          ansible.builtin.shell: ". {{ job_logs.path }}/versions.cfg && echo v${VERSIONS[nfv-example-cnf-index]}"
           register: index_output
           args:
             executable: /bin/bash
             chdir: "{{ dci_change_dir }}/example-cnf"
 
         - name: Override index and app variables
-          set_fact:
+          ansible.builtin.set_fact:
             operator_version: "{{ index_output.stdout }}"
             example_cnf_index_image: "quay.io/rh-nfv-int/nfv-example-cnf-catalog:{{ index_output.stdout }}"
 
@@ -110,7 +115,7 @@
           pod-security.kubernetes.io/enforce-version: "latest"
 
 - name: "Add CNF Namespace to the list of NS to get logs from"
-  set_fact:
+  ansible.builtin.set_fact:
     ns_list: "{{ ns_list|default([]) + [ ecd_cnf_namespace ] }}"
 
 - name: Set the CNF mandatory network policies
@@ -161,7 +166,7 @@
   tags: [sriov]
 
 - name: "Install required rpm packages"
-  package:
+  ansible.builtin.package:
     name:
       - git
       - make
@@ -172,7 +177,7 @@
   become: true
 
 - name: Mirror catalog in disconnected environment
-  include_tasks: mirror-catalog.yml
+  ansible.builtin.include_tasks: mirror-catalog.yml
   when:
     - dci_disconnected | default(false) | bool
 
@@ -180,7 +185,7 @@
   vars:
     ecd_action: "catalog"
     ecd_operator_version: "{{ operator_version }}"
-  include_role:
+  ansible.builtin.include_role:
     name: redhatci.ocp.example_cnf_deploy
 
 ...

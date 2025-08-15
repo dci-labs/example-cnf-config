@@ -6,7 +6,7 @@
   register: rclass
 
 - name: Select High performance RuntimeClass
-  set_fact:
+  ansible.builtin.set_fact:
     runtime_class: "{{ rclass | json_query(query) | first }}"
   vars:
     query: "resources[?handler=='high-performance'].metadata.name"
@@ -23,7 +23,7 @@
     ecd_trex_tests_skip_failures: "{{ example_cnf_skip_trex_job_failure | default(false) | bool }}"
     ecd_job_logs_path: "{{ job_logs.path }}"
     ecd_network_config_file: "{{ example_cnf_network_config_file | default('') }}"
-  include_role:
+  ansible.builtin.include_role:
     name: redhatci.ocp.example_cnf_deploy
 
 # if replica = 1, recommended not to set maxUnavailable to 0 or 0% and minAvailable to 100% for upgrades
@@ -36,7 +36,7 @@
     definition: "{{ lookup('template', 'templates/pdb.yml.j2') | from_yaml }}"
 
 - name: Apply configuration for certsuite execution
-  include_role:
+  ansible.builtin.include_role:
     name: "{{ dci_config_dir }}/hooks/roles/apply-certsuite-config"
   when: do_certsuite|default(false)|bool
 

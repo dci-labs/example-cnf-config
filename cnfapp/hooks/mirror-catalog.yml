@@ -1,6 +1,6 @@
 ---
 - name: Mirror catalog image
-  include_role:
+  ansible.builtin.include_role:
     name: redhatci.ocp.mirror_images
   vars:
     mi_authfile: "{{ pullsecret_tmp_file }}"
@@ -15,7 +15,7 @@
   register: idms_res
 
 - name: Mirror images in the catalog
-  include_role:
+  ansible.builtin.include_role:
     name: redhatci.ocp.mirror_catalog
   vars:
     mc_oc_tool_path: "{{ oc_tool_path }}"
@@ -32,7 +32,7 @@
     src: "{{ mc_is_file.path }}"
 
 - name: Wait for MCP status
-  include_role:
+  ansible.builtin.include_role:
     name: redhatci.ocp.check_resource
   vars:
     resource_to_check: "MachineConfigPool"
@@ -41,7 +41,7 @@
     check_reason: "Image Source update in mirror-rh-nfv"
 
 - name: Delete Image Source file
-  file:
+  ansible.builtin.file:
     path: "{{ mc_is_file.path }}"
     state: absent
   when: mc_is_file is defined
