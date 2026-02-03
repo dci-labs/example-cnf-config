@@ -1,0 +1,60 @@
+---
+- name: Get example-cnf component details from job.components
+  ansible.builtin.set_fact:
+    example_cnf_index_image: "{{ item['data']['url'] }}:{{ item['version'] }}"
+  with_items: "{{ hostvars.localhost.job_info.job.components }}"
+  when: item["type"] == "nfv-example-cnf-index"
+
+- name: Get example-cnf related images from the index
+  ansible.builtin.shell:
+    cmd: >
+      set -e -o pipefail;
+      {{ opm_tool_path }} render
+      {{ example_cnf_index_image }} |
+      jq -rn 'inputs | select(.schema == "olm.bundle").relatedImages[].image'
+  args:
+    executable: /bin/bash
+  register: catalog_data_cmd
+  retries: 1
+  delay: 5
+  until:
+    - catalog_data_cmd.rc == 0
+  when: example_cnf_index_image is defined
+
+- name: Create the preflight_operators_to_certify variable
+  when: catalog_data_cmd.stdout_lines is defined
+  block:
+
+    - name: Create an empty preflight_operators_to_certify variable
+      ansible.builtin.set_fact:
+        preflight_operators_to_certify: []
+
+    - name: Populate the preflight_operators_to_certify variable
+      ansible.builtin.set_fact:
+        preflight_operators_to_certify: "{{ preflight_operators_to_certify + [dict(bundle_image=item, index_image=example_cnf_index_image)] }}"
+      when: '"grout-operator-bundle" in item'
+      loop: "{{ catalog_data_cmd.stdout_lines }}"
+
+    - name: Display the prefight_operators_to_certify variable
+      ansible.builtin.debug:
+        msg: "{{ preflight_operators_to_certify }}"
+
+- name: Create the preflight_containers_to_certify variable
+  when: catalog_data_cmd.stdout_lines is defined
+  block:
+
+    - name: Create an empty preflight_containers_to_certify variable
+      ansible.builtin.set_fact:
+        preflight_containers_to_certify: []
+
+    - name: Populate the preflight_containers_to_certify variable
+      ansible.builtin.set_fact:
+        preflight_containers_to_certify: "{{ preflight_containers_to_certify + [dict(container_image=item)] }}"
+      when: '"trex-container" in item'
+      loop: "{{ catalog_data_cmd.stdout_lines }}"
+
+    - name: Display the prefight_containers_to_certify variable
+      ansible.builtin.debug:
+        msg: "{{ preflight_containers_to_certify }}"
+
+...
