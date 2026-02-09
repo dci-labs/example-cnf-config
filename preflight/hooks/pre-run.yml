@@ -22,7 +22,9 @@
   when: example_cnf_index_image is defined
 
 - name: Create the preflight_operators_to_certify variable
-  when: catalog_data_cmd.stdout_lines is defined
+  when:
+    - catalog_data_cmd.stdout_lines is defined
+    - example_cnf_preflight_workflow | default('all') in ['operator', 'all']
   block:
 
     - name: Create an empty preflight_operators_to_certify variable
@@ -40,7 +42,9 @@
         msg: "{{ preflight_operators_to_certify }}"
 
 - name: Create the preflight_containers_to_certify variable
-  when: catalog_data_cmd.stdout_lines is defined
+  when:
+    - catalog_data_cmd.stdout_lines is defined
+    - example_cnf_preflight_workflow | default('all') in ['container', 'all']
   block:
 
     - name: Create an empty preflight_containers_to_certify variable

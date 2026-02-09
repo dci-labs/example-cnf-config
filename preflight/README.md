@@ -15,3 +15,5 @@ The `preflight` directory contains several Ansible hooks involved in preparing a
     - We will take grout-operator-bundle for this test.
 - Build `preflight_containers_to_certify` variable based on the index content.
     - We will take trex-container images for this test.
+- Workflow selection with `example_cnf_preflight_workflow` variable:
+    - The `example_cnf_preflight_workflow` variable provides fine-grained control over which certification checks are executed. Its value can be set to `"all"`, `"operator"`, or `"container"`.
