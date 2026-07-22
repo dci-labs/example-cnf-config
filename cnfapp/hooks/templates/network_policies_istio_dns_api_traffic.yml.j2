@@ -75,8 +75,23 @@
             name: allow-apiserver-egress
             namespace: "{{ ecd_cnf_namespace }}"
           spec:
-            podSelector: {}
+            # Only operator controllers need kube-apiserver; dataplane pods stay default-deny.
+            podSelector:
+              matchLabels:
+                control-plane: controller-manager
+            policyTypes:
+              - Egress
             egress:
-              - ports:
+              - to:
+{% for cidr in ecd_apiserver_cidrs | default([]) %}
+                  - ipBlock:
+                      cidr: "{{ cidr }}"
+{% endfor %}
+                  - namespaceSelector:
+                      matchLabels:
+                        kubernetes.io/metadata.name: openshift-kube-apiserver
+                ports:
                   - protocol: TCP
                     port: 6443
+                  - protocol: TCP
+                    port: 443

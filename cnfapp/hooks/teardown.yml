@@ -43,7 +43,7 @@
 
 - name: "Delete all resources within the namespace {{ ecd_cnf_namespace }}"
   ansible.builtin.shell: >
-    {{ oc_tool_path }} delete all --all -n {{ ecd_cnf_namespace }}
+    {{ oc_tool_path | quote }} delete all --all -n {{ ecd_cnf_namespace | quote }}
   ignore_errors: yes
 
 - name: "Delete the namespace {{ ecd_cnf_namespace }}"
@@ -115,5 +115,15 @@
     state: absent
   tags: [sriov]
   when: example_cnf_enable_rdma_exclusive | default(false) | bool
+
+# Best-effort cleanup of the jumphost pull-secret path used for disconnected mirroring.
+- name: Remove temporary registry pull-secret file
+  ansible.builtin.file:
+    path: "{{ pullsecret_tmp_file }}"
+    state: absent
+  when:
+    - pullsecret_tmp_file is defined
+    - pullsecret_tmp_file | length > 0
+  no_log: true
 
 ...

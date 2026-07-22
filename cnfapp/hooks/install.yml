@@ -17,6 +17,7 @@
     ecd_action: "deploy"
     ecd_cnfapp_name: "{{ example_cnf_cnfapp_name }}"
     ecd_operator_version: "{{ operator_version }}"
+    ecd_catalog_image: "{{ example_cnf_index_image }}"
     ecd_opm_path: "{{ opm_tool_path }}"
     ecd_oc_path: "{{ oc_tool_path }}"
     ecd_high_perf_runtime: "{{ runtime_class | default('') }}"

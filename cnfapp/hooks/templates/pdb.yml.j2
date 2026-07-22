@@ -7,7 +7,7 @@ items:
     name: controller-manager-pdb-min
     namespace: {{ ecd_cnf_namespace }}
   spec:
-    minAvailable: 0
+    minAvailable: 1
     selector:
       matchLabels:
         control-plane: controller-manager

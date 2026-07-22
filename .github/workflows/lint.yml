@@ -1,0 +1,52 @@
+---
+name: lint
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+  push:
+    branches: [master]
+
+permissions:
+  contents: read
+
+jobs:
+  yamllint:
+    name: yamllint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+
+      - name: Install yamllint
+        run: pip install yamllint
+
+      - name: Run yamllint
+        run: yamllint -c .yamllint.yml .
+
+  ansible-lint:
+    name: ansible-lint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+
+      - name: Set up Python
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5.6.0
+        with:
+          python-version: "3.11"
+
+      - name: Install ansible-lint
+        run: |
+          pip install --upgrade pip
+          pip install ansible-lint
+
+      - name: Run ansible-lint
+        run: |
+          ansible-lint --version
+          ansible-lint --profile basic \
+            cnfapp/hooks/ \
+            draining_validation/hooks/ \
+            launch_trex_job/hooks/ \
+            preflight/hooks/ \
+            upgrade_validation/hooks/

@@ -1,0 +1,40 @@
+---
+# Resolve example_cnf_index_image from a mutable tag to an immutable @sha256 digest.
+# No-op when the ref is already digest-pinned. Optional pullsecret_tmp_file for auth.
+- name: Resolve example_cnf_index_image to digest
+  when:
+    - example_cnf_index_image is defined
+    - example_cnf_index_image | length > 0
+    - "'@sha256:' not in example_cnf_index_image"
+  block:
+    - name: Inspect catalog index image for digest
+      ansible.builtin.command:
+        argv: "{{ _ecd_skopeo_inspect_argv }}"
+      vars:
+        _ecd_skopeo_inspect_argv: "{{ ['skopeo', 'inspect'] + (['--authfile', pullsecret_tmp_file] if (pullsecret_tmp_file is defined and pullsecret_tmp_file | length > 0) else []) + ['docker://' ~ example_cnf_index_image] }}"
+      register: example_cnf_index_inspect
+      retries: 5
+      delay: 5
+      until: example_cnf_index_inspect.rc == 0
+      no_log: "{{ pullsecret_tmp_file is defined and pullsecret_tmp_file | length > 0 }}"
+
+    - name: Extract catalog index digest
+      ansible.builtin.set_fact:
+        example_cnf_index_digest: "{{ example_cnf_index_inspect.stdout | from_json | json_query('Digest') }}"
+
+    - name: Fail if digest was not returned
+      ansible.builtin.assert:
+        that:
+          - example_cnf_index_digest is match('^sha256:[0-9a-f]{64}$')
+        fail_msg: >-
+          Could not resolve digest for {{ example_cnf_index_image }}
+          (got: {{ example_cnf_index_digest | default('empty') }})
+
+    - name: Pin example_cnf_index_image to digest
+      ansible.builtin.set_fact:
+        example_cnf_index_image: >-
+          {{ example_cnf_index_image | regex_replace(':[^/:]+$', '') }}@{{ example_cnf_index_digest }}
+
+    - name: Display pinned catalog index image
+      ansible.builtin.debug:
+        var: example_cnf_index_image

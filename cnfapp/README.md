@@ -15,3 +15,9 @@ Some variables than can be used for debugging purposes:
 | example_cnf_network_config_file   | No       | ''         | Path to find the network config file to provide IP-MAC config to TRex and CNFApp (required for Grout) |
 | run_migration_test                | No       | true       | Enable migration tests                                                                                |
 | run_opcap_check                   | No       | true       | Enable opcap check                                                                                    |
+
+## Pod Security Admission
+
+The `example-cnf` namespace is created with `pod-security.kubernetes.io/enforce: privileged` because DPDK/SR-IOV workloads need capabilities and device access that are not allowed under the `baseline` or `restricted` Pod Security Standards (for example `IPC_LOCK`, `NET_ADMIN`, and vfio). SCC-to-PSA label sync is disabled so OpenShift does not overwrite that choice.
+
+`audit` and `warn` are set to `restricted` so pods that would violate the restricted profile are still recorded and warned about, without failing admission for the lab/CI workload. This namespace is ephemeral and removed during teardown; it is not intended as a production security boundary.
