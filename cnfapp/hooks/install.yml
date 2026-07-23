@@ -38,7 +38,7 @@
 
 - name: Apply configuration for certsuite execution
   ansible.builtin.include_role:
-    name: "{{ dci_config_dir }}/hooks/roles/apply-certsuite-config"
+    name: "{{ dci_config_dir }}/hooks/roles/apply_certsuite_config"
   when: do_certsuite|default(false)|bool
 
 ...

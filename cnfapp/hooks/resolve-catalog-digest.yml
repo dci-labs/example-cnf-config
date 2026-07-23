@@ -11,7 +11,9 @@
       ansible.builtin.command:
         argv: "{{ _ecd_skopeo_inspect_argv }}"
       vars:
-        _ecd_skopeo_inspect_argv: "{{ ['skopeo', 'inspect'] + (['--authfile', pullsecret_tmp_file] if (pullsecret_tmp_file is defined and pullsecret_tmp_file | length > 0) else []) + ['docker://' ~ example_cnf_index_image] }}"
+        _ecd_skopeo_inspect_args_auth: >-
+          {{ ['--authfile', pullsecret_tmp_file] if (pullsecret_tmp_file is defined and pullsecret_tmp_file | length > 0) else [] }}
+        _ecd_skopeo_inspect_argv: "{{ ['skopeo', 'inspect'] + _ecd_skopeo_inspect_args_auth + ['docker://' ~ example_cnf_index_image] }}"
       register: example_cnf_index_inspect
       retries: 5
       delay: 5

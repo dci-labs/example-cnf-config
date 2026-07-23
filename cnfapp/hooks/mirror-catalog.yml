@@ -47,4 +47,3 @@
     path: "{{ mc_is_file.path }}"
     state: absent
   when: mc_is_file is defined
-

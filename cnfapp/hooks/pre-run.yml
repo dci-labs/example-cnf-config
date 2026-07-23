@@ -40,7 +40,10 @@
 
     - block:
         - name: Generate versions
-          ansible.builtin.shell: 'JSON=$(ls ../example-cnf-[0-9]*.json); if [ -z "$JSON" ]; then JSON=../github.json; fi; ./generate-versions.sh {{ (job_logs.path ~ "/versions.cfg") | quote }} pr$(jq -r .number $JSON).$(jq -r .head.sha $JSON|cut -c1-8)'
+          ansible.builtin.shell: |
+            JSON=$(ls ../example-cnf-[0-9]*.json)
+            if [ -z "$JSON" ]; then JSON=../github.json; fi
+            ./generate-versions.sh {{ (job_logs.path ~ "/versions.cfg") | quote }} pr$(jq -r .number $JSON).$(jq -r .head.sha $JSON|cut -c1-8)
           args:
             executable: /bin/bash
             chdir: "{{ dci_change_dir }}/example-cnf"
