@@ -36,7 +36,3 @@
       ansible.builtin.set_fact:
         example_cnf_index_image: >-
           {{ example_cnf_index_image | regex_replace(':[^/:]+$', '') }}@{{ example_cnf_index_digest }}
-
-    - name: Display pinned catalog index image
-      ansible.builtin.debug:
-        var: example_cnf_index_image
