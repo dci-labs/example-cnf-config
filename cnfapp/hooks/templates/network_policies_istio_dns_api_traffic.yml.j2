@@ -69,16 +69,28 @@
                   - namespaceSelector:
                       matchLabels:
                         kubernetes.io/metadata.name: openshift-dns
+{# Operators and dataplane pods that call the kube API in-cluster
+   (trex-cfg-configure, trexmac/trexevent, retrieve-grout-ip-addresses).
+   Keep allow-apiserver-egress name for controller-manager so upgrades
+   replace the previous single policy in place. #}
+{% set ecd_apiserver_egress_selectors = [
+  {'name': 'allow-apiserver-egress', 'matchLabels': {'control-plane': 'controller-manager'}},
+  {'name': 'allow-apiserver-egress-pkt-gen', 'matchLabels': {'example-cnf-type': 'pkt-gen'}},
+  {'name': 'allow-apiserver-egress-pkt-gen-app', 'matchLabels': {'example-cnf-type': 'pkt-gen-app'}},
+  {'name': 'allow-apiserver-egress-cnf-app', 'matchLabels': {'example-cnf-type': 'cnf-app'}},
+] %}
+{% for selector in ecd_apiserver_egress_selectors %}
         - kind: NetworkPolicy
           apiVersion: networking.k8s.io/v1
           metadata:
-            name: allow-apiserver-egress
+            name: {{ selector.name }}
             namespace: "{{ ecd_cnf_namespace }}"
           spec:
-            # Only operator controllers need kube-apiserver; dataplane pods stay default-deny.
             podSelector:
               matchLabels:
-                control-plane: controller-manager
+{% for key, value in selector.matchLabels.items() %}
+                {{ key }}: {{ value }}
+{% endfor %}
             policyTypes:
               - Egress
             egress:
@@ -95,3 +107,4 @@
                     port: 6443
                   - protocol: TCP
                     port: 443
+{% endfor %}

@@ -144,7 +144,8 @@
   loop_control:
     loop_var: label
 
-# Discover kube-apiserver destinations so allow-apiserver-egress is not open to any :6443.
+# Discover kube-apiserver destinations so allow-apiserver-egress* is not open to any :6443.
+# Policies cover operators plus dataplane pods that call the API (pkt-gen, pkt-gen-app, cnf-app).
 - name: Get kubernetes Service for apiserver egress policy
   kubernetes.core.k8s_info:
     api_version: v1
