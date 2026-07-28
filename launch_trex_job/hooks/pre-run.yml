@@ -11,14 +11,23 @@
   with_items: "{{ hostvars.localhost.job_info.job.components }}"
   when: item["type"] == "nfv-example-cnf-index"
 
+- name: Set catalog index image from operator version
+  ansible.builtin.set_fact:
+    example_cnf_index_image: "quay.io/rh-nfv-int/nfv-example-cnf-catalog:{{ operator_version }}"
+  when: operator_version is defined
+
+- name: Resolve catalog index image to digest
+  ansible.builtin.include_tasks: "{{ dci_config_dir }}/../cnfapp/hooks/resolve-catalog-digest.yml"
+  when:
+    - example_cnf_index_image is defined
+    - dci_config_dir is defined
+
 - name: Find versions from the catalog
-  vars:
-    catalog_image: "quay.io/rh-nfv-int/nfv-example-cnf-catalog:{{ operator_version }}"
   ansible.builtin.shell:
     cmd: >
       set -e -o pipefail;
-      {{ opm_tool_path }} render
-      {{ catalog_image }} |
+      {{ opm_tool_path | quote }} render
+      {{ example_cnf_index_image | quote }} |
       jq -rn 'inputs | select(.schema == "olm.bundle").relatedImages[].image'
   args:
     executable: /bin/bash

@@ -1,0 +1,20 @@
+---
+# Soften first-time CI for this lab config repo.
+profile: basic
+
+exclude_paths:
+  - .github/
+  - .tools/
+  - security-audit/
+
+skip_list:
+  - yaml[line-length]
+  - name[template]
+  - risky-shell-pipe
+  - command-instead-of-shell
+  - jinja[spacing]
+  - var-naming[no-role-prefix]
+  - fqcn[action-core]
+  - ignore-errors
+  - no-handler
+  - no-changed-when

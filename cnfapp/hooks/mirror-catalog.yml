@@ -7,6 +7,7 @@
     mi_images:
       - "{{ example_cnf_index_image }}"
     mi_registry: "{{ dci_local_registry }}"
+  no_log: true
 
 - name: Find ImageDigestMirrorSet in the cluster
   kubernetes.core.k8s_info:
@@ -26,6 +27,7 @@
   when:
     - dci_local_registry | length
     - pullsecret_tmp_file is defined
+  no_log: true
 
 - name: Apply Image Source file
   kubernetes.core.k8s:
@@ -45,4 +47,3 @@
     path: "{{ mc_is_file.path }}"
     state: absent
   when: mc_is_file is defined
-

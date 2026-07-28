@@ -43,4 +43,4 @@
 
 - name: "Set list of job names"
   ansible.builtin.set_fact:
-      list: "{{ job | json_query('resources[*].metadata.name')}}"
+    list: "{{ job | json_query('resources[*].metadata.name')}}"

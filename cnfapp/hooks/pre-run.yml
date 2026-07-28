@@ -40,13 +40,16 @@
 
     - block:
         - name: Generate versions
-          ansible.builtin.shell: 'JSON=$(ls ../example-cnf-[0-9]*.json); if [ -z "$JSON" ]; then JSON=../github.json; fi; ./generate-versions.sh {{ job_logs.path }}/versions.cfg pr$(jq -r .number $JSON).$(jq -r .head.sha $JSON|cut -c1-8)'
+          ansible.builtin.shell: |
+            JSON=$(ls ../example-cnf-[0-9]*.json)
+            if [ -z "$JSON" ]; then JSON=../github.json; fi
+            ./generate-versions.sh {{ (job_logs.path ~ "/versions.cfg") | quote }} pr$(jq -r .number $JSON).$(jq -r .head.sha $JSON|cut -c1-8)
           args:
             executable: /bin/bash
             chdir: "{{ dci_change_dir }}/example-cnf"
 
         - name: Get index version
-          ansible.builtin.shell: ". {{ job_logs.path }}/versions.cfg && echo v${VERSIONS[nfv-example-cnf-index]}"
+          ansible.builtin.shell: ". {{ (job_logs.path ~ '/versions.cfg') | quote }} && echo v${VERSIONS[nfv-example-cnf-index]}"
           register: index_output
           args:
             executable: /bin/bash
@@ -67,6 +70,11 @@
   when:
     - dci_change_dir is defined
 
+# Pin catalog tag to @sha256 before opm render / mirror / CatalogSource.
+- name: Resolve catalog index image to digest
+  ansible.builtin.include_tasks: resolve-catalog-digest.yml
+  when: example_cnf_index_image is defined
+
 - name: Create the preflight_operators_to_certify variable
   when:
     - certify_operators | default(false) | bool
@@ -76,8 +84,8 @@
       ansible.builtin.shell:
         cmd: >
           set -e -o pipefail;
-          {{ opm_tool_path }} render
-          {{ example_cnf_index_image }} |
+          {{ opm_tool_path | quote }} render
+          {{ example_cnf_index_image | quote }} |
           jq -rn 'inputs | select(.schema == "olm.bundle").relatedImages[].image'
       args:
         executable: /bin/bash
@@ -101,6 +109,8 @@
       ansible.builtin.debug:
         msg: "{{ preflight_operators_to_certify }}"
 
+# PSA enforce=privileged is required for DPDK/SR-IOV (IPC_LOCK, NET_ADMIN, vfio).
+# audit/warn=restricted keep violations visible without blocking the lab workload.
 - name: "Create CNF Namespace"
   kubernetes.core.k8s:
     state: present
@@ -113,6 +123,10 @@
           security.openshift.io/scc.podSecurityLabelSync: "false"
           pod-security.kubernetes.io/enforce: "privileged"
           pod-security.kubernetes.io/enforce-version: "latest"
+          pod-security.kubernetes.io/audit: "restricted"
+          pod-security.kubernetes.io/audit-version: "latest"
+          pod-security.kubernetes.io/warn: "restricted"
+          pod-security.kubernetes.io/warn-version: "latest"
 
 - name: "Add CNF Namespace to the list of NS to get logs from"
   ansible.builtin.set_fact:
@@ -129,6 +143,68 @@
     - "control-plane=controller-manager"
   loop_control:
     loop_var: label
+
+# Discover kube-apiserver destinations so allow-apiserver-egress* is not open to any :6443.
+# Policies cover operators plus dataplane pods that call the API (pkt-gen, pkt-gen-app, cnf-app).
+- name: Get kubernetes Service for apiserver egress policy
+  kubernetes.core.k8s_info:
+    api_version: v1
+    kind: Service
+    name: kubernetes
+    namespace: default
+  register: ecd_kubernetes_svc
+
+- name: Get kubernetes Endpoints for apiserver egress policy
+  kubernetes.core.k8s_info:
+    api_version: v1
+    kind: Endpoints
+    name: kubernetes
+    namespace: default
+  register: ecd_kubernetes_ep
+
+- name: Initialize apiserver egress CIDR list
+  ansible.builtin.set_fact:
+    ecd_apiserver_cidrs: []
+
+- name: Add kubernetes Service ClusterIP to apiserver egress CIDRs
+  when:
+    - ecd_kubernetes_svc.resources | length > 0
+    - ecd_kubernetes_svc.resources[0].spec.clusterIP is defined
+    - ecd_kubernetes_svc.resources[0].spec.clusterIP | length > 0
+  ansible.builtin.set_fact:
+    ecd_apiserver_cidrs: >-
+      {{
+        ecd_apiserver_cidrs + [
+          ecd_kubernetes_svc.resources[0].spec.clusterIP
+          ~ ('/128' if ':' in ecd_kubernetes_svc.resources[0].spec.clusterIP else '/32')
+        ]
+      }}
+
+- name: Add kubernetes Endpoint IPs to apiserver egress CIDRs
+  when: ecd_kubernetes_ep.resources | length > 0
+  ansible.builtin.set_fact:
+    ecd_apiserver_cidrs: >-
+      {{
+        ecd_apiserver_cidrs + [
+          item ~ ('/128' if ':' in item else '/32')
+        ]
+      }}
+  loop: >-
+    {{
+      ecd_kubernetes_ep.resources[0].subsets
+      | default([])
+      | map(attribute='addresses')
+      | select('defined')
+      | list
+      | flatten
+      | map(attribute='ip')
+      | list
+      | unique
+    }}
+
+- name: Deduplicate apiserver egress CIDRs
+  ansible.builtin.set_fact:
+    ecd_apiserver_cidrs: "{{ ecd_apiserver_cidrs | unique | list }}"
 
 - name: Set network policies for openshift DNS, API and Istio
   kubernetes.core.k8s:
@@ -173,7 +249,8 @@
       - python3-openshift
       - python3-pyyaml
       - ansible-collection-community-kubernetes
-    state: latest
+    # present: install if missing; do not auto-upgrade mid-pipeline.
+    state: present
   become: true
 
 - name: Mirror catalog in disconnected environment
@@ -185,6 +262,7 @@
   vars:
     ecd_action: "catalog"
     ecd_operator_version: "{{ operator_version }}"
+    ecd_catalog_image: "{{ example_cnf_index_image }}"
   ansible.builtin.include_role:
     name: redhatci.ocp.example_cnf_deploy
 
